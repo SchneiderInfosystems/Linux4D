@@ -11,7 +11,7 @@ This concerns the following questions:
 
 ## Wiki
 
-[You get a fast introduction in the functionality of this library in our Wiki](https://github.com/SchneiderInfosystems/Linux4D/wiki/Gettings-Started-with-LX4D).
+[You get a fast introduction in the functionality of this library in our Wiki](https://github.com/SchneiderInfosystems/Linux4D/wiki/Gettings-Started-with-Linux4D).
 
 # Extended Linux4D (Commercial library)
 
