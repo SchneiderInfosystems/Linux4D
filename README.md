@@ -28,8 +28,8 @@ end;
 ```
 
 ## Wiki
-For a quick start guide, detailed functional overview, and more examples, please visit our Wiki.
-[You get a fast introduction in the functionality of this library in our Wiki](https://github.com/SchneiderInfosystems/Linux4D/wiki/Gettings-Started-with-Linux4D).
+For a quick start guide, detailed functional overview, and more examples, please visit our 
+[Wiki](https://github.com/SchneiderInfosystems/Linux4D/wiki/Gettings-Started-with-Linux4D).
 
 ## License (Open-Source Core)
 The open-source Linux4D library is licensed under the Apache-2.0 license. Please see the LICENSE file for more details.
