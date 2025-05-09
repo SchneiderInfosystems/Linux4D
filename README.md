@@ -42,7 +42,7 @@ For users requiring advanced system interaction capabilities, we offer Extended 
 * A secure mechanism for running parts of your application or the entire application with root privileges.
 * Executing Bash commands from your application, with options for synchronous (blocking) or asynchronous execution.
 
-Interested in Extended Linux4D? 
+Interested in **Extended Linux4D**? 
 
 For inquiries, tailored solutions, and quotes, please contact us at delphi@schneider-infosys.ch.
 
