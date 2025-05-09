@@ -317,89 +317,448 @@ end;
 
 class function TLX4DSystemInfo.GetLanguagePretty: string;
 begin
-  // English
-  if SameText(FLanguage, 'en') and SameText(FRegion, 'US') then
-    result := 'English (United States)'
-  else if SameText(FLanguage, 'en') and SameText(FRegion, 'GB') then
-    result := 'English (United Kingdom)'
-  else if SameText(FLanguage, 'en') and SameText(FRegion, 'CA') then
-    result := 'English (Canada)'
-  else if SameText(FLanguage, 'en') and SameText(FRegion, 'AU') then
-    result := 'English (Australia)'
-  else if SameText(FLanguage, 'en') and FRegion.IsEmpty then
-    result := 'English'
-
-  // German
-  else if SameText(FLanguage, 'de') and SameText(FRegion, 'DE') then
-    result := 'German (Germany)'
-  else if SameText(FLanguage, 'de') and SameText(FRegion, 'AT') then
-    result := 'German (Austria)'
-  else if SameText(FLanguage, 'de') and SameText(FRegion, 'CH') then
-    result := 'German (Switzerland)'
-  else if SameText(FLanguage, 'de') and FRegion.IsEmpty then
-    result := 'German'
-
-  // French
-  else if SameText(FLanguage, 'fr') and SameText(FRegion, 'FR') then
-    result := 'French (France)'
-  else if SameText(FLanguage, 'fr') and SameText(FRegion, 'CA') then
-    result := 'French (Canada)'
-  else if SameText(FLanguage, 'fr') and SameText(FRegion, 'BE') then
-    result := 'French (Belgium)'
-  else if SameText(FLanguage, 'fr') and FRegion.IsEmpty then
-    result := 'French'
-
-  // Spanish
-  else if SameText(FLanguage, 'es') and SameText(FRegion, 'ES') then
-    result := 'Spanish (Spain)'
-  else if SameText(FLanguage, 'es') and SameText(FRegion, 'MX') then
-    result := 'Spanish (Mexico)'
-  else if SameText(FLanguage, 'es') and SameText(FRegion, 'AR') then
-    result := 'Spanish (Argentina)'
-  else if SameText(FLanguage, 'es') and FRegion.IsEmpty then
-    result := 'Spanish'
-
-  // Italian
-  else if SameText(FLanguage, 'it') and SameText(FRegion, 'IT') then
-    result := 'Italian (Italy)'
-  else if SameText(FLanguage, 'it') and FRegion.IsEmpty then
-    result := 'Italian'
-
-  // Portuguese
-  else if SameText(FLanguage, 'pt') and SameText(FRegion, 'PT') then
-    result := 'Portuguese (Portugal)'
-  else if SameText(FLanguage, 'pt') and SameText(FRegion, 'BR') then
-    result := 'Portuguese (Brazil)'
-  else if SameText(FLanguage, 'pt') and FRegion.IsEmpty then
-    result := 'Portuguese'
-
-  // Chinese
-  else if SameText(FLanguage, 'zh') and SameText(FRegion, 'CN') then
-    result := 'Chinese (China)'
-  else if SameText(FLanguage, 'zh') and SameText(FRegion, 'TW') then
-    result := 'Chinese (Taiwan)'
-  else if SameText(FLanguage, 'zh') and FRegion.IsEmpty then
-    result := 'Chinese'
-
-  // Japanese
+  result := ''; // Fallback
+  if SameText(FLanguage, 'en') then
+  begin
+    if SameText(FRegion, 'US') then
+      result := 'English (United States)'
+    else if SameText(FRegion, 'GB') then
+      result := 'English (United Kingdom)'
+    else if SameText(FRegion, 'CA') then
+      result := 'English (Canada)'
+    else if SameText(FRegion, 'AU') then
+      result := 'English (Australia)'
+    else if SameText(FRegion, 'NZ') then
+      result := 'English (New Zealand)'
+    else if SameText(FRegion, 'IE') then
+      result := 'English (Ireland)'
+    else if SameText(FRegion, 'ZA') then
+      result := 'English (South Africa)'
+    else if SameText(FRegion, 'SG') then
+      result := 'English (Singapore)'
+    else if SameText(FRegion, 'IN') then
+      result := 'English (India)'
+    else if FRegion.IsEmpty then
+      result := 'English'
+    else
+      result := 'English (' + FRegion + ')';
+  end
+  else if SameText(FLanguage, 'de') then
+  begin
+    if SameText(FRegion, 'DE') then
+      result := 'German (Germany)'
+    else if SameText(FRegion, 'AT') then
+      result := 'German (Austria)'
+    else if SameText(FRegion, 'CH') then
+      result := 'German (Switzerland)'
+    else if SameText(FRegion, 'LI') then
+      result := 'German (Liechtenstein)'
+    else if SameText(FRegion, 'LU') then
+      result := 'German (Luxembourg)'
+    else if FRegion.IsEmpty then
+      result := 'German'
+    else
+      result := 'German (' + FRegion + ')';
+  end
+  else if SameText(FLanguage, 'fr') then
+  begin
+    if SameText(FRegion, 'FR') then
+      result := 'French (France)'
+    else if SameText(FRegion, 'CA') then
+      result := 'French (Canada)'
+    else if SameText(FRegion, 'BE') then
+      result := 'French (Belgium)'
+    else if SameText(FRegion, 'CH') then
+      result := 'French (Switzerland)'
+    else if SameText(FRegion, 'LU') then
+      result := 'French (Luxembourg)'
+    else if SameText(FRegion, 'MC') then
+      result := 'French (Monaco)'
+    else if FRegion.IsEmpty then
+      result := 'French'
+    else
+      result := 'French (' + FRegion + ')';
+  end
+  else if SameText(FLanguage, 'es') then
+  begin
+    if SameText(FRegion, 'ES') then
+      result := 'Spanish (Spain)'
+    else if SameText(FRegion, 'MX') then
+      result := 'Spanish (Mexico)'
+    else if SameText(FRegion, 'AR') then
+      result := 'Spanish (Argentina)'
+    else if SameText(FRegion, 'CO') then
+      result := 'Spanish (Colombia)'
+    else if SameText(FRegion, 'CL') then
+      result := 'Spanish (Chile)'
+    else if SameText(FRegion, 'PE') then
+      result := 'Spanish (Peru)'
+    else if SameText(FRegion, 'VE') then
+      result := 'Spanish (Venezuela)'
+    else if SameText(FRegion, 'US') then
+      result := 'Spanish (United States)'
+    else if FRegion.IsEmpty then
+      result := 'Spanish'
+    else
+      result := 'Spanish (' + FRegion + ')';
+  end
+  else if SameText(FLanguage, 'it') then
+  begin
+    if SameText(FRegion, 'IT') then
+      result := 'Italian (Italy)'
+    else if SameText(FRegion, 'CH') then
+      result := 'Italian (Switzerland)'
+    else if FRegion.IsEmpty then
+      result := 'Italian'
+    else
+      result := 'Italian (' + FRegion + ')';
+  end
+  else if SameText(FLanguage, 'pt') then
+  begin
+    if SameText(FRegion, 'PT') then
+      result := 'Portuguese (Portugal)'
+    else if SameText(FRegion, 'BR') then
+      result := 'Portuguese (Brazil)'
+    else if FRegion.IsEmpty then
+      result := 'Portuguese'
+    else
+      result := 'Portuguese (' + FRegion + ')';
+  end
+  else if SameText(FLanguage, 'zh') then
+  begin
+    if SameText(FRegion, 'CN') then
+      result := 'Chinese (Simplified, China)'
+    else if SameText(FRegion, 'TW') then
+      result := 'Chinese (Traditional, Taiwan)'
+    else if SameText(FRegion, 'HK') then
+      result := 'Chinese (Traditional, Hong Kong)'
+    else if SameText(FRegion, 'SG') then
+      result := 'Chinese (Simplified, Singapore)'
+    else if SameText(FRegion, 'MO') then
+      result := 'Chinese (Traditional, Macau)' // Macau
+    else if FRegion.IsEmpty then
+      result := 'Chinese'
+    else
+      result := 'Chinese (' + FRegion + ')';
+  end
   else if SameText(FLanguage, 'ja') then
-    result := 'Japanese'
-
-  // Korean
+  begin
+    if SameText(FRegion, 'JP') or FRegion.IsEmpty then
+      result := 'Japanese'
+    else
+      result := 'Japanese (' + FRegion + ')';
+  end
   else if SameText(FLanguage, 'ko') then
-    result := 'Korean'
-
-  // Russian
+  begin
+    if SameText(FRegion, 'KR') or FRegion.IsEmpty then
+      result := 'Korean'
+    else
+      result := 'Korean (' + FRegion + ')';
+  end
   else if SameText(FLanguage, 'ru') then
-    result := 'Russian'
-
-  // Polish
+  begin
+    if SameText(FRegion, 'RU') or FRegion.IsEmpty then
+      result := 'Russian'
+    else
+      result := 'Russian (' + FRegion + ')';
+  end
+  else if SameText(FLanguage, 'nl') then
+  begin
+    if SameText(FRegion, 'NL') then
+      result := 'Dutch (Netherlands)'
+    else if SameText(FRegion, 'BE') then
+      result := 'Dutch (Belgium)'
+    else if SameText(FRegion, 'SR') then
+      result := 'Dutch (Suriname)'
+    else if FRegion.IsEmpty then
+      result := 'Dutch'
+    else
+      result := 'Dutch (' + FRegion + ')';
+  end
   else if SameText(FLanguage, 'pl') then
-    result := 'Polish'
-
-  // Fallback
-  else
-    result := FLanguage + ' (' + FRegion + ')';
+  begin
+    if SameText(FRegion, 'PL') or FRegion.IsEmpty then
+      result := 'Polish'
+    else
+      result := 'Polish (' + FRegion + ')';
+  end
+  else if SameText(FLanguage, 'sv') then
+  begin
+    if SameText(FRegion, 'SE') then
+      result := 'Swedish (Sweden)'
+    else if SameText(FRegion, 'FI') then
+      result := 'Swedish (Finland)'
+    else if FRegion.IsEmpty then
+      result := 'Swedish'
+    else
+      result := 'Swedish (' + FRegion + ')';
+  end
+  else if SameText(FLanguage, 'no') or SameText(FLanguage, 'nb') or SameText(FLanguage, 'nn') then
+  begin
+    if SameText(FLanguage, 'nb') or (SameText(FLanguage, 'no') and (SameText(FRegion, 'NO') or FRegion.IsEmpty)) then
+      result := 'Norwegian Bokmål'
+    else if SameText(FLanguage, 'nn') then
+      result := 'Norwegian Nynorsk'
+    else if SameText(FLanguage, 'no') then
+      result := 'Norwegian';
+    if not FRegion.IsEmpty and not SameText(FRegion, 'NO') then
+      if result <> '' then
+        result := result + ' (' + FRegion + ')'
+      else
+        result := 'Norwegian (' + FRegion + ')' // Fallback
+    else if result = '' then
+      result := 'Norwegian (' + FRegion + ')';
+  end
+  else if SameText(FLanguage, 'da') then
+  begin
+    if SameText(FRegion, 'DK') or FRegion.IsEmpty then
+      result := 'Danish'
+    else if SameText(FRegion, 'GL') then
+      result := 'Danish (Greenland)'
+    else
+      result := 'Danish (' + FRegion + ')';
+  end
+  else if SameText(FLanguage, 'fi') then
+  begin
+    if SameText(FRegion, 'FI') or FRegion.IsEmpty then
+      result := 'Finnish'
+    else
+      result := 'Finnish (' + FRegion + ')';
+  end
+  else if SameText(FLanguage, 'cs') then
+  begin
+    if SameText(FRegion, 'CZ') or FRegion.IsEmpty then
+      result := 'Czech'
+    else
+      result := 'Czech (' + FRegion + ')';
+  end
+  else if SameText(FLanguage, 'sk') then
+  begin
+    if SameText(FRegion, 'SK') or FRegion.IsEmpty then
+      result := 'Slovak'
+    else
+      result := 'Slovak (' + FRegion + ')';
+  end
+  else if SameText(FLanguage, 'hu') then
+  begin
+    if SameText(FRegion, 'HU') or FRegion.IsEmpty then
+      result := 'Hungarian'
+    else
+      result := 'Hungarian (' + FRegion + ')';
+  end
+  else if SameText(FLanguage, 'el') then
+  begin
+    if SameText(FRegion, 'GR') then
+      result := 'Greek (Greece)'
+    else if SameText(FRegion, 'CY') then
+      result := 'Greek (Cyprus)'
+    else if FRegion.IsEmpty then
+      result := 'Greek'
+    else
+      result := 'Greek (' + FRegion + ')';
+  end
+  else if SameText(FLanguage, 'tr') then
+  begin
+    if SameText(FRegion, 'TR') or FRegion.IsEmpty then
+      result := 'Turkish'
+    else if SameText(FRegion, 'CY') then
+      result := 'Turkish (Cyprus)'
+    else
+      result := 'Turkish (' + FRegion + ')';
+  end
+  else if SameText(FLanguage, 'ar') then
+  begin
+    if SameText(FRegion, 'SA') then
+      result := 'Arabic (Saudi Arabia)'
+    else if SameText(FRegion, 'EG') then
+      result := 'Arabic (Egypt)'
+    else if SameText(FRegion, 'AE') then
+      result := 'Arabic (United Arab Emirates)'
+    else if SameText(FRegion, 'DZ') then
+      result := 'Arabic (Algeria)'
+    else if SameText(FRegion, 'IQ') then
+      result := 'Arabic (Iraq)'
+    else if SameText(FRegion, 'JO') then
+      result := 'Arabic (Jordan)'
+    else if SameText(FRegion, 'KW') then
+      result := 'Arabic (Kuwait)'
+    else if SameText(FRegion, 'LB') then
+      result := 'Arabic (Lebanon)'
+    else if SameText(FRegion, 'LY') then
+      result := 'Arabic (Libya)'
+    else if SameText(FRegion, 'MA') then
+      result := 'Arabic (Morocco)'
+    else if SameText(FRegion, 'OM') then
+      result := 'Arabic (Oman)'
+    else if SameText(FRegion, 'QA') then
+      result := 'Arabic (Qatar)'
+    else if SameText(FRegion, 'SY') then
+      result := 'Arabic (Syria)'
+    else if SameText(FRegion, 'TN') then
+      result := 'Arabic (Tunisia)'
+    else if SameText(FRegion, 'YE') then
+      result := 'Arabic (Yemen)'
+    else if FRegion.IsEmpty then
+      result := 'Arabic'
+    else
+      result := 'Arabic (' + FRegion + ')';
+  end
+  else if SameText(FLanguage, 'he') or SameText(FLanguage, 'iw') then // 'iw' is old code for Hebrew
+  begin
+    if SameText(FRegion, 'IL') or FRegion.IsEmpty then
+      result := 'Hebrew'
+    else
+      result := 'Hebrew (' + FRegion + ')';
+  end
+  else if SameText(FLanguage, 'hi') then
+  begin
+    if SameText(FRegion, 'IN') or FRegion.IsEmpty then
+      result := 'Hindi'
+    else
+      result := 'Hindi (' + FRegion + ')';
+  end
+  else if SameText(FLanguage, 'th') then
+  begin
+    if SameText(FRegion, 'TH') or FRegion.IsEmpty then
+      result := 'Thai'
+    else
+      result := 'Thai (' + FRegion + ')';
+  end
+  else if SameText(FLanguage, 'id') or SameText(FLanguage, 'in') then // 'in' is old code
+  begin
+    if SameText(FRegion, 'ID') or FRegion.IsEmpty then
+      result := 'Indonesian'
+    else
+      result := 'Indonesian (' + FRegion + ')';
+  end
+  else if SameText(FLanguage, 'ms') then
+  begin
+    if SameText(FRegion, 'MY') then
+      result := 'Malay (Malaysia)'
+    else if SameText(FRegion, 'BN') then
+      result := 'Malay (Brunei)'
+    else if SameText(FRegion, 'SG') then
+      result := 'Malay (Singapore)'
+    else if FRegion.IsEmpty then
+      result := 'Malay'
+    else
+      result := 'Malay (' + FRegion + ')';
+  end
+  else if SameText(FLanguage, 'vi') then
+  begin
+    if SameText(FRegion, 'VN') or FRegion.IsEmpty then
+      result := 'Vietnamese'
+    else
+      result := 'Vietnamese (' + FRegion + ')';
+  end
+  else if SameText(FLanguage, 'uk') then
+  begin
+    if SameText(FRegion, 'UA') or FRegion.IsEmpty then
+      result := 'Ukrainian'
+    else
+      result := 'Ukrainian (' + FRegion + ')';
+  end
+  else if SameText(FLanguage, 'ro') then
+  begin
+    if SameText(FRegion, 'RO') then
+      result := 'Romanian (Romania)'
+    else if SameText(FRegion, 'MD') then
+      result := 'Romanian (Moldova)'
+    else if FRegion.IsEmpty then
+      result := 'Romanian'
+    else
+      result := 'Romanian (' + FRegion + ')';
+  end
+  else if SameText(FLanguage, 'bg') then
+  begin
+    if SameText(FRegion, 'BG') or FRegion.IsEmpty then
+      result := 'Bulgarian'
+    else
+      result := 'Bulgarian (' + FRegion + ')';
+  end
+  else if SameText(FLanguage, 'hr') then
+  begin
+    if SameText(FRegion, 'HR') or FRegion.IsEmpty then
+      result := 'Croatian'
+    else
+      result := 'Croatian (' + FRegion + ')';
+  end
+  else if SameText(FLanguage, 'sr') then
+  begin
+    if SameText(FRegion, 'RS') then
+      result := 'Serbian (Serbia)'
+    else if SameText(FRegion, 'BA') then
+      result := 'Serbian (Bosnia and Herzegovina)'
+    else if SameText(FRegion, 'ME') then
+      result := 'Serbian (Montenegro)'
+    else if FRegion.IsEmpty then
+      result := 'Serbian'
+    else
+      result := 'Serbian (' + FRegion + ')';
+  end
+  else if SameText(FLanguage, 'sl') then
+  begin
+    if SameText(FRegion, 'SI') or FRegion.IsEmpty then
+      result := 'Slovenian'
+    else
+      result := 'Slovenian (' + FRegion + ')';
+  end
+  else if SameText(FLanguage, 'et') then
+  begin
+    if SameText(FRegion, 'EE') or FRegion.IsEmpty then
+      result := 'Estonian'
+    else
+      result := 'Estonian (' + FRegion + ')';
+  end
+  else if SameText(FLanguage, 'lv') then
+  begin
+    if SameText(FRegion, 'LV') or FRegion.IsEmpty then
+      result := 'Latvian'
+    else
+      result := 'Latvian (' + FRegion + ')';
+  end
+  else if SameText(FLanguage, 'lt') then
+  begin
+    if SameText(FRegion, 'LT') or FRegion.IsEmpty then
+      result := 'Lithuanian'
+    else
+      result := 'Lithuanian (' + FRegion + ')';
+  end
+  else if SameText(FLanguage, 'is') then
+  begin
+    if SameText(FRegion, 'IS') or FRegion.IsEmpty then
+      result := 'Icelandic'
+    else
+      result := 'Icelandic (' + FRegion + ')';
+  end
+  else if SameText(FLanguage, 'ga') then
+  begin
+    if SameText(FRegion, 'IE') or FRegion.IsEmpty then
+      result := 'Irish'
+    else
+      result := 'Irish (' + FRegion + ')';
+  end
+  else if SameText(FLanguage, 'cy') then
+  begin
+    if SameText(FRegion, 'GB') or FRegion.IsEmpty then
+      result := 'Welsh' // GB as region, because Welsh is part of GB
+    else
+      result := 'Welsh (' + FRegion + ')';
+  end
+  else if SameText(FLanguage, 'gd') then
+  begin
+    if SameText(FRegion, 'GB') or FRegion.IsEmpty then
+      result := 'Scottish Gaelic' // GB as region
+    else
+      result := 'Scottish Gaelic (' + FRegion + ')';
+  end;
+  if result.IsEmpty and not FLanguage.IsEmpty then
+  begin
+    if not FRegion.IsEmpty then
+      result := FLanguage + ' (' + FRegion + ')'
+    else
+      result := FLanguage;
+  end;
 end;
 
 class function TLX4DSystemInfo.ReadProcFile(const FilePath: string): TStringList;
