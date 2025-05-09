@@ -46,4 +46,4 @@ Interested in Extended Linux4D?
 
 For inquiries, tailored solutions, and quotes, please contact us at delphi@schneider-infosys.ch.
 
-May-2025, Schneider Infosystems AG, Switzerland
+May 2025, Schneider Infosystems AG, Switzerland
