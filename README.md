@@ -1,2 +1,17 @@
 # Linux4D
-Delphi library for system-oriented programming with Linux
+Delphi library for system-oriented programming with Linux.
+
+This open source library helps to obtain information about the running Linux system. 
+This concerns the following questions:
+- Which language has been installed? 
+- Which coding does Linux work with?
+- Which Linux distribution is installed in this system?  
+- Information about the Linux kernel and hardware (CPU).
+
+There is also a commercial component that goes further and solves the following tasks:
+- Which packages are installed?
+- Installation of a specific package
+- Solution to run an application with root rights
+- Start a bash commands from an application blocking or asynchronously.
+
+Ask us at delphi@schneider-infosys.ch for a quote.
