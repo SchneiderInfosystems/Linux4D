@@ -72,7 +72,7 @@ type
     class procedure FetchUser; static;
     class procedure FetchUserWithRootRights; static;
     class procedure FetchLinuxDistribution; static;
-    class function GetDistrubutionKindStr: string; static;
+    class function GetDistributionKindStr: string; static;
     class procedure FetchKernel; static;
     class procedure FetchCPU; static;
     class procedure FetchLanguage; static;
@@ -82,17 +82,65 @@ type
   public
     class constructor Create;
     class destructor Destroy;
+
+    /// <summary>
+    /// Returns all collected system information in JSON format as a string.
+    /// </summary>
     class function ToJSON: string; static;
+
+    /// <summary>
+    /// Returns the user ID (UID) under which the process is running.
+    /// </summary>
     class property UserID: cardinal read FUID;
+
+    /// <summary>
+    /// Returns the name of the user running the current process.
+    /// </summary>
     class property UserName: string read FUserName;
+
+    /// <summary>
+    /// Indicates whether the application is running with root privileges.
+    /// </summary>
     class property RunWithRootRights: boolean read FRunWithRootRights;
+
+    /// <summary>
+    /// Returns information about the currently used Linux distribution.
+    /// </summary>
     class property Distribution: TDistribution read FDistribution;
-    class property DistrubutionKindStr: string read GetDistrubutionKindStr;
+
+    /// <summary>
+    /// Returns the name of the distribution as a string (e.g., "Ubuntu", "Debian").
+    /// </summary>
+    class property DistributionKindStr: string read GetDistributionKindStr;
+
+    /// <summary>
+    /// Returns information about the current kernel, such as system name, version, and architecture.
+    /// </summary>
     class property Kernel: TKernel read FKernel;
+
+    /// <summary>
+    /// Returns information about the CPU, including model, speed, cache, and core count.
+    /// </summary>
     class property CPU: TCPU read FCPU;
+
+    /// <summary>
+    /// Returns the current language in a human-readable format (e.g., "English (United States)").
+    /// </summary>
     class property LanguagePretty: string read GetLanguagePretty;
+
+    /// <summary>
+    /// Returns the configured language code (e.g., "en", "de").
+    /// </summary>
     class property Language: string read FLanguage;
+
+    /// <summary>
+    /// Returns the configured region code (e.g., "US", "DE").
+    /// </summary>
     class property Region: string read FRegion;
+
+    /// <summary>
+    /// Returns the character encoding in use (e.g., "UTF-8").
+    /// </summary>
     class property Encoding: string read FEncoding;
   end;
 
@@ -226,7 +274,7 @@ begin
     FDistribution.Kind := Fedora;
 end;
 
-class function TLX4DSystemInfo.GetDistrubutionKindStr: string;
+class function TLX4DSystemInfo.GetDistributionKindStr: string;
 begin
   result := TRttiEnumerationType.GetName<TDistributionKind>(FDistribution.Kind);
 end;
@@ -269,8 +317,87 @@ end;
 
 class function TLX4DSystemInfo.GetLanguagePretty: string;
 begin
-  if FRegion.IsEmpty then
-    result := FLanguage
+  // English
+  if SameText(FLanguage, 'en') and SameText(FRegion, 'US') then
+    result := 'English (United States)'
+  else if SameText(FLanguage, 'en') and SameText(FRegion, 'GB') then
+    result := 'English (United Kingdom)'
+  else if SameText(FLanguage, 'en') and SameText(FRegion, 'CA') then
+    result := 'English (Canada)'
+  else if SameText(FLanguage, 'en') and SameText(FRegion, 'AU') then
+    result := 'English (Australia)'
+  else if SameText(FLanguage, 'en') and FRegion.IsEmpty then
+    result := 'English'
+
+  // German
+  else if SameText(FLanguage, 'de') and SameText(FRegion, 'DE') then
+    result := 'German (Germany)'
+  else if SameText(FLanguage, 'de') and SameText(FRegion, 'AT') then
+    result := 'German (Austria)'
+  else if SameText(FLanguage, 'de') and SameText(FRegion, 'CH') then
+    result := 'German (Switzerland)'
+  else if SameText(FLanguage, 'de') and FRegion.IsEmpty then
+    result := 'German'
+
+  // French
+  else if SameText(FLanguage, 'fr') and SameText(FRegion, 'FR') then
+    result := 'French (France)'
+  else if SameText(FLanguage, 'fr') and SameText(FRegion, 'CA') then
+    result := 'French (Canada)'
+  else if SameText(FLanguage, 'fr') and SameText(FRegion, 'BE') then
+    result := 'French (Belgium)'
+  else if SameText(FLanguage, 'fr') and FRegion.IsEmpty then
+    result := 'French'
+
+  // Spanish
+  else if SameText(FLanguage, 'es') and SameText(FRegion, 'ES') then
+    result := 'Spanish (Spain)'
+  else if SameText(FLanguage, 'es') and SameText(FRegion, 'MX') then
+    result := 'Spanish (Mexico)'
+  else if SameText(FLanguage, 'es') and SameText(FRegion, 'AR') then
+    result := 'Spanish (Argentina)'
+  else if SameText(FLanguage, 'es') and FRegion.IsEmpty then
+    result := 'Spanish'
+
+  // Italian
+  else if SameText(FLanguage, 'it') and SameText(FRegion, 'IT') then
+    result := 'Italian (Italy)'
+  else if SameText(FLanguage, 'it') and FRegion.IsEmpty then
+    result := 'Italian'
+
+  // Portuguese
+  else if SameText(FLanguage, 'pt') and SameText(FRegion, 'PT') then
+    result := 'Portuguese (Portugal)'
+  else if SameText(FLanguage, 'pt') and SameText(FRegion, 'BR') then
+    result := 'Portuguese (Brazil)'
+  else if SameText(FLanguage, 'pt') and FRegion.IsEmpty then
+    result := 'Portuguese'
+
+  // Chinese
+  else if SameText(FLanguage, 'zh') and SameText(FRegion, 'CN') then
+    result := 'Chinese (China)'
+  else if SameText(FLanguage, 'zh') and SameText(FRegion, 'TW') then
+    result := 'Chinese (Taiwan)'
+  else if SameText(FLanguage, 'zh') and FRegion.IsEmpty then
+    result := 'Chinese'
+
+  // Japanese
+  else if SameText(FLanguage, 'ja') then
+    result := 'Japanese'
+
+  // Korean
+  else if SameText(FLanguage, 'ko') then
+    result := 'Korean'
+
+  // Russian
+  else if SameText(FLanguage, 'ru') then
+    result := 'Russian'
+
+  // Polish
+  else if SameText(FLanguage, 'pl') then
+    result := 'Polish'
+
+  // Fallback
   else
     result := FLanguage + ' (' + FRegion + ')';
 end;
