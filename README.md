@@ -39,7 +39,7 @@ The open-source Linux4D library is licensed under the Apache-2.0 license. Please
 For users requiring advanced system interaction capabilities, we offer Extended Linux4D. This commercial library builds upon the open-source core and provides additional features, including:
 * Querying installed system packages.
 * Programmatic installation of specific packages.
-* A secure mechanism for running parts of your application with root privileges.
+* A secure mechanism for running parts of your application or the entire application with root privileges.
 * Executing Bash commands from your application, with options for synchronous (blocking) or asynchronous execution.
 
 Interested in Extended Linux4D? 
