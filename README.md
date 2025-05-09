@@ -13,7 +13,7 @@ This concerns the following questions:
 
 [You get a fast introduction in the functionality of this library in our Wiki](https://github.com/SchneiderInfosystems/Linux4D/wiki/Gettings-Started-with-LX4D).
 
-# Linux4Delphi (Commercial Library)
+# Extended Linux4D (Commercial library)
 
 There is also a commercial component that goes further and solves the following tasks:
 - Which packages are installed?
