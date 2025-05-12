@@ -26,7 +26,7 @@ unit LX4D.SystemInfo;
 interface
 
 uses
-  System.Types, System.Classes, System.SysUtils, System.RTTI;
+  System.Types, System.Classes, System.SysUtils, System.RTTI, System.JSON;
 
 type
   TLX4DSystemInfo = record
@@ -41,6 +41,8 @@ type
       Release: double;
       Details: TStringList;
       SourceFile: string;
+      function KindStr: string;
+      function ToJSON: TJSONObject;
     end;
     TKernel = record
       SystemName: string;
@@ -48,6 +50,7 @@ type
       Release: string;
       Machine: string;
       function PrettyName: string;
+      function ToJSON: TJSONObject;
     end;
     TCPU = record
       ModelName: string;
@@ -58,6 +61,7 @@ type
       CacheSize: string;
       Details: TStringList;
       function PrettyName: string;
+      function ToJSON: TJSONObject;
     end;
   private
     class var FUID: cardinal;
@@ -68,17 +72,19 @@ type
     class var FCPU: TCPU;
     class var FLanguage: string;
     class var FRegion: string;
-    class var FEncoding: string;
+    class var FEncoding: TEncoding;
+    class var FEncodingStr: string;
     class procedure FetchUser; static;
     class procedure FetchUserWithRootRights; static;
     class procedure FetchLinuxDistribution; static;
-    class function GetDistributionKindStr: string; static;
     class procedure FetchKernel; static;
     class procedure FetchCPU; static;
     class procedure FetchLanguage; static;
     class function GetLanguagePretty: string; static;
     class function ReadProcFile(const FilePath: string): TStringList; static;
     class function YesNoStrToBool(const BoolStr: string): boolean; static;
+    class function GetEnvironmentVariables: TStringList; static;
+    class function GetLibVersion: string; static;
   public
     class constructor Create;
     class destructor Destroy;
@@ -86,7 +92,7 @@ type
     /// <summary>
     /// Returns all collected system information in JSON format as a string.
     /// </summary>
-    class function ToJSON: string; static;
+    class function ToJSON: TJSONObject; static;
 
     /// <summary>
     /// Returns the user ID (UID) under which the process is running.
@@ -107,11 +113,6 @@ type
     /// Returns information about the currently used Linux distribution.
     /// </summary>
     class property Distribution: TDistribution read FDistribution;
-
-    /// <summary>
-    /// Returns the name of the distribution as a string (e.g., "Ubuntu", "Debian").
-    /// </summary>
-    class property DistributionKindStr: string read GetDistributionKindStr;
 
     /// <summary>
     /// Returns information about the current kernel, such as system name, version, and architecture.
@@ -141,13 +142,27 @@ type
     /// <summary>
     /// Returns the character encoding in use (e.g., "UTF-8").
     /// </summary>
-    class property Encoding: string read FEncoding;
+    class property EncodingStr: string read FEncodingStr;
+
+    /// <summary>
+    /// Returns the character encoding in use (e.g., "UTF-8").
+    /// </summary>
+    class property Encoding: TEncoding read FEncoding;
+
+    class property EnvironmentVariables: TStringList read GetEnvironmentVariables;
+
+    /// <summary>
+    /// Returns the version number of the LX4D library.
+    /// </summary>
+    class property LibVersion: string read GetLibVersion;
   end;
 
 implementation
 
 uses
-  Posix.Unistd, Posix.Stdlib, Posix.Pwd, Posix.SysUtsname;
+  Posix.Unistd, Posix.Stdlib, Posix.Pwd, Posix.SysUtsname, Posix.Base, Posix.Dlfcn;
+
+{$I LX4DVersion.inc}
 
 const
   // System Files
@@ -158,23 +173,30 @@ const
   // Sytem Environment Variables
   PKEXEC_UID = 'PKEXEC_UID';
   SUDO_USER = 'SUDO_USER';
+  SUDO_UID = 'SUDO_UID';
   LOGNAME = 'LOGNAME';
   USER = 'USER';
   LANG = 'LANG';
 
 class constructor TLX4DSystemInfo.Create;
 begin
+  FetchLanguage;
   FetchUser;
   FetchLinuxDistribution;
   FetchKernel;
   FetchCPU;
-  FetchLanguage;
 end;
 
 class destructor TLX4DSystemInfo.Destroy;
 begin
   FreeAndNil(FDistribution.Details);
   FreeAndNil(FCPU.Details);
+end;
+
+class function TLX4DSystemInfo.GetLibVersion: string;
+begin
+  result := cLibMajorVersion.ToString + '.' + cLibMinorVersion.ToString + '.' + cLibReleaseVersion.ToString + '.' +
+    cLibBuildVersion.ToString;
 end;
 
 class procedure TLX4DSystemInfo.FetchUser;
@@ -197,24 +219,34 @@ end;
 class procedure TLX4DSystemInfo.FetchUserWithRootRights;
 var
   Env: PAnsiChar;
-  UID: cardinal;
   pw: PPasswd;
 begin
   FUserName := '?'; // Fallback
   Env := getenv(PKEXEC_UID);
   if assigned(Env) then
   begin
-    UID := StrToIntDef(string(Env), -1);
-    if UID > 0 then
+    FUID := StrToIntDef(string(Env), -1);
+    if FUID > 0 then
     begin
-      pw := getpwuid(UID);
+      pw := getpwuid(FUID);
       if assigned(pw) then
+      begin
         FUserName := string(pw^.pw_name);
+        exit;
+      end;
     end;
   end;
   Env := getenv(SUDO_USER);
   if assigned(Env) then
-    FUserName := string(Env)
+  begin
+    FUserName := string(Env);
+    Env := getenv(SUDO_UID);
+    if assigned(Env) then
+    begin
+      FUID := StrToIntDef(string(Env), -1);
+      exit;
+    end;
+  end
   else begin
     Env := getenv(LOGNAME);
     if assigned(Env) then
@@ -238,7 +270,7 @@ begin
   if FileExists(OSReleaseFile) then
   begin
     FDistribution.SourceFile := OSReleaseFile;
-    FDistribution.Details.LoadFromFile(OSReleaseFile);
+    FDistribution.Details.LoadFromFile(OSReleaseFile, Encoding);
     FDistribution.ID := FDistribution.Details.Values['ID'].DeQuotedString('"');
     FDistribution.BaseID := FDistribution.Details.Values['ID_LIKE'].DeQuotedString('"');
     FDistribution.Release := StrToFloatDef(FDistribution.Details.Values['VERSION_ID'].DeQuotedString('"'), 0, fs);
@@ -258,7 +290,7 @@ begin
   else if FileExists(LSBReleaseFile) then
   begin
     FDistribution.SourceFile := LSBReleaseFile;
-    FDistribution.Details.LoadFromFile(LSBReleaseFile);
+    FDistribution.Details.LoadFromFile(LSBReleaseFile, Encoding);
     FDistribution.ID := FDistribution.Details.Values['DISTRIB_ID'].DeQuotedString('"');
     FDistribution.Release := StrToFloatDef(FDistribution.Details.Values['DISTRIB_RELEASE'].DeQuotedString('"'), 0, fs);
     FDistribution.CodeName := FDistribution.Details.Values['DISTRIB_CODENAME'].DeQuotedString('"');
@@ -274,11 +306,7 @@ begin
     FDistribution.Kind := Fedora;
 end;
 
-class function TLX4DSystemInfo.GetDistributionKindStr: string;
-begin
-  result := TRttiEnumerationType.GetName<TDistributionKind>(FDistribution.Kind);
-end;
-
+{$REGION 'Kernel'}
 class procedure TLX4DSystemInfo.FetchKernel;
 var
   UtsName: TUTSName;
@@ -291,7 +319,9 @@ begin
     FKernel.Machine := string(UtsName.machine);
   end;
 end;
+{$ENDREGION}
 
+{$REGION 'Language'}
 class procedure TLX4DSystemInfo.FetchLanguage;
 var
   Language: string;
@@ -303,7 +333,14 @@ begin
     strs := Language.Split(['.']);
     FLanguage := strs[0];
     if length(strs) = 2 then
-      FEncoding := strs[1];
+    begin
+      FEncoding := TEncoding.ASCII;
+      FEncodingStr := strs[1];
+      if SameText(FEncodingStr, 'UTF-8') then
+        FEncoding := TEncoding.UTF8
+      else if SameText(FEncodingStr, 'ISO-8859-1') or SameText(FEncodingStr, 'Latin-1') then
+        FEncoding := TEncoding.ANSI;
+    end;
     strs := FLanguage.Split(['_']);
     if length(strs) = 2 then
     begin
@@ -761,6 +798,24 @@ begin
   end;
 end;
 
+{$ENDREGION}
+
+{$REGION 'Environment Variables'}
+
+class function TLX4DSystemInfo.GetEnvironmentVariables: TStringList;
+var
+  p: PMarshaledAString;
+begin
+  result := TStringList.Create;
+  p := environ;
+  while (p^ <> nil) do
+  begin
+    result.Add(string(p^));
+    Inc(p);
+  end;
+end;
+{$ENDREGION}
+
 class function TLX4DSystemInfo.ReadProcFile(const FilePath: string): TStringList;
 var
   F: TextFile;
@@ -830,11 +885,17 @@ begin
     FCPU.Details.Add('File not found: ' + CPUINFO);
 end;
 
-class function TLX4DSystemInfo.ToJSON: string;
+class function TLX4DSystemInfo.ToJSON: TJSONObject;
 begin
-  result := Format(
-    '{"UserID":%d,"UserName":"%s","Distribution":"%s","Language":"%s","Encoding":"%s","Kernel":"%s","CPU":"%s"}',
-    [FUID, FUserName, FDistribution.PrettyName, GetLanguagePretty, FEncoding, FKernel.PrettyName, FCPU.PrettyName]);
+  result := TJSONObject.Create(TJSONPair.Create('UserID', FUID)).
+    AddPair('UserName', FUserName).
+    AddPair('Distribution', FDistribution.ToJSON).
+    AddPair('Language', FLanguage).
+    AddPair('Region', FRegion).
+    AddPair('LanguageAndRegion', GetLanguagePretty).
+    AddPair('Encoding', FEncodingStr).
+    AddPair('Kernel', FKernel.ToJSON).
+    AddPair('CPU', FCPU.ToJSON);
 end;
 
 { TLX4DSystemInfo.TKernel }
@@ -844,12 +905,50 @@ begin
   result := Format('%s %s (%s), Net: %s', [SystemName, Release, Machine, NodeName]);
 end;
 
+function TLX4DSystemInfo.TKernel.ToJSON: TJSONObject;
+begin
+  result := TJSONObject.Create(TJSONPair.Create('SystemName', SystemName)).
+    AddPair('NodeName', NodeName).
+    AddPair('Release', Release).
+    AddPair('Machine', Machine);
+end;
+
 { TLX4DSystemInfo.TCPU }
 
 function TLX4DSystemInfo.TCPU.PrettyName: string;
 begin
   result := Format('%s (%s) (%d Cores, %4.2f MHz), CacheSize: %s, FPU: %s',
     [ModelName, VendorID, LogicalCores, CPUMHz, CacheSize, BoolToStr(FPU, true)]);
+end;
+
+function TLX4DSystemInfo.TCPU.ToJSON: TJSONObject;
+begin
+  result := TJSONObject.Create(TJSONPair.Create('ModelName', ModelName)).
+    AddPair('VendorID', VendorID).
+    AddPair('CPUMHz', CPUMHz).
+    AddPair('LogicalCores', LogicalCores).
+    AddPair('FPU', FPU).
+    AddPair('CacheSize', CacheSize).
+    AddPair('Details', Details.CommaText);
+end;
+
+{ TLX4DSystemInfo.TDistribution }
+
+function TLX4DSystemInfo.TDistribution.KindStr: string;
+begin
+  result := TRttiEnumerationType.GetName<TDistributionKind>(FDistribution.Kind);
+end;
+
+function TLX4DSystemInfo.TDistribution.ToJSON: TJSONObject;
+begin
+  result := TJSONObject.Create(TJSONPair.Create('Kind', KindStr)).
+    AddPair('ID', ID).
+    AddPair('BaseID', BaseID).
+    AddPair('CodeName', CodeName).
+    AddPair('PrettyName', PrettyName).
+    AddPair('Release', Release).
+    AddPair('Details', Details.CommaText).
+    AddPair('SourceFile', SourceFile);
 end;
 
 end.

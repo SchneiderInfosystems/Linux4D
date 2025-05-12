@@ -46,9 +46,13 @@ type
 
 implementation
 
+uses
+  LX4D.SystemInfo;
+
 const
   // System Files
   ConfigUserDirs = '/.config/user-dirs.dirs';
+  HomeRoot = '/home/';
 
   // Sytem Environment Variables
   HOME = 'HOME';
@@ -99,14 +103,27 @@ class function TLX4DPath.GetXDGPath(const Key, DefaultFolder: string): string;
 var
   HomeDir, UserDirsFileName: string;
 begin
-  HomeDir := GetEnvironmentVariable(HOME);
-  result := TPath.Combine(HomeDir, DefaultFolder); // Fallback solution
-  if not assigned(FUserDirs) then
+  if TLX4DSystemInfo.RunWithRootRights then
   begin
-    FUserDirs := TStringList.Create;
-    UserDirsFileName := HomeDir + ConfigUserDirs;
-    if FileExists(UserDirsFileName) then
-      FUserDirs.LoadFromFile(UserDirsFileName, TEncoding.UTF8);
+    HomeDir := HomeRoot + TLX4DSystemInfo.UserName;
+    result := TPath.Combine(HomeDir, DefaultFolder); // Fallback solution
+    if not assigned(FUserDirs) then
+    begin
+      FUserDirs := TStringList.Create;
+      UserDirsFileName := HomeDir + ConfigUserDirs;
+      if FileExists(UserDirsFileName) then
+        FUserDirs.LoadFromFile(UserDirsFileName, TLX4DSystemInfo.Encoding);
+    end;
+  end else begin
+    HomeDir := GetEnvironmentVariable(HOME);
+    result := TPath.Combine(HomeDir, DefaultFolder); // Fallback solution
+    if not assigned(FUserDirs) then
+    begin
+      FUserDirs := TStringList.Create;
+      UserDirsFileName := HomeDir + ConfigUserDirs;
+      if FileExists(UserDirsFileName) then
+        FUserDirs.LoadFromFile(UserDirsFileName, TLX4DSystemInfo.Encoding);
+    end;
   end;
   result := FUserDirs.Values[Key];
   if not result.IsEmpty then

@@ -38,38 +38,44 @@ begin
   ReportMemoryLeaksOnShutdown := true;
   {$ENDIF}
   try
-    Writeln('LX4DemoConsoleApp ========================================');
-    Writeln('TLX4DSystemInfo ------------------------------------------');
+    Writeln('LX4DemoConsoleApp Version ======================================== ' + TLX4DSystemInfo.LibVersion + ' ===');
+    Writeln('TLX4DSystemInfo ----------------------------------------------------------------');
     if TLX4DSystemInfo.RunWithRootRights then
       Writeln('Application runs with root rights')
     else
-      Writeln('Current User ID .... : ' + TLX4DSystemInfo.UserID.ToString);
-    Writeln('Language ........... : ' + TLX4DSystemInfo.LanguagePretty);
-    Writeln('Encoding ........... : ' + TLX4DSystemInfo.Encoding);
-    Writeln('Current User Name .. : ' + TLX4DSystemInfo.UserName);
-    Writeln('Kernel ............. : ' + TLX4DSystemInfo.Kernel.PrettyName);
-    Writeln('CPU ................ : ' + TLX4DSystemInfo.CPU.PrettyName);
+      Writeln('Application runs without root rights');
+    Writeln('Current User ID ..... : ' + TLX4DSystemInfo.UserID.ToString);
+    Writeln('Language ............ : ' + TLX4DSystemInfo.LanguagePretty);
+    Writeln('Encoding ............ : ' + TLX4DSystemInfo.EncodingStr);
+    Writeln('Current User Name ... : ' + TLX4DSystemInfo.UserName);
+    Writeln('Kernel .............. : ' + TLX4DSystemInfo.Kernel.PrettyName);
+    Writeln('CPU ................. : ' + TLX4DSystemInfo.CPU.PrettyName);
     {$IFDEF DEBUG}
     for var line in TLX4DSystemInfo.CPU.Details do
       Writeln('  ' + line);
     {$ENDIF}
-    Writeln('Distribution ....... : ' + TLX4DSystemInfo.Distribution.PrettyName);
-    Writeln('Distribution.Release : ' + TLX4DSystemInfo.Distribution.Release.ToString);
-    Writeln('Distribution.BaseID  : ' + TLX4DSystemInfo.Distribution.BaseID);
-    Writeln('Distribution.CodeName: ' + TLX4DSystemInfo.Distribution.CodeName);
-    Writeln('Distribution.SrcFile : ' + TLX4DSystemInfo.Distribution.SourceFile);
+    Writeln('Distribution ........ : ' + TLX4DSystemInfo.Distribution.PrettyName);
+    Writeln('Distribution.Release  : ' + TLX4DSystemInfo.Distribution.Release.ToString);
+    Writeln('Distribution.BaseID . : ' + TLX4DSystemInfo.Distribution.BaseID);
+    Writeln('Distribution.CodeName : ' + TLX4DSystemInfo.Distribution.CodeName);
+    Writeln('Distribution.SrcFile  : ' + TLX4DSystemInfo.Distribution.SourceFile);
     {$IFDEF DEBUG}
     for var line in TLX4DSystemInfo.Distribution.Details do
       Writeln('  ' + line);
     {$ENDIF}
-    Writeln('TLX4DPath ------------------------------------------------');
-    Writeln('Desktop path ....... : ' + TLX4DPath.GetDesktopPath);
-    Writeln('Downloads path ..... : ' + TLX4DPath.GetDownloadsPath);
-    Writeln('Public path ........ : ' + TLX4DPath.GetPublicPath);
-    Writeln('Documents path ..... : ' + TLX4DPath.GetDocumentsPath);
-    Writeln('Music path ......... : ' + TLX4DPath.GetMusicPath);
-    Writeln('Pictures path ...... : ' + TLX4DPath.GetPicturesPath);
-    Writeln('Movies path ........ : ' + TLX4DPath.GetMoviesPath);
+    {$IFDEF DEBUG}
+    Writeln('Environment Variables : ');
+    for var line in TLX4DSystemInfo.EnvironmentVariables do
+      Writeln('  ' + line);
+    {$ENDIF}
+    Writeln('TLX4DPath ----------------------------------------------------------------------');
+    Writeln('Desktop path ........ : ' + TLX4DPath.GetDesktopPath);
+    Writeln('Downloads path ...... : ' + TLX4DPath.GetDownloadsPath);
+    Writeln('Public path ......... : ' + TLX4DPath.GetPublicPath);
+    Writeln('Documents path ...... : ' + TLX4DPath.GetDocumentsPath);
+    Writeln('Music path .......... : ' + TLX4DPath.GetMusicPath);
+    Writeln('Pictures path ....... : ' + TLX4DPath.GetPicturesPath);
+    Writeln('Movies path ......... : ' + TLX4DPath.GetMoviesPath);
   except
     on E: Exception do
       Writeln(E.ClassName, ': ', E.Message);
