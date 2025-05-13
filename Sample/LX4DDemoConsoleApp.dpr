@@ -55,9 +55,10 @@ begin
       Writeln('  ' + line);
     {$ENDIF}
     Writeln('Distribution ........ : ' + TLX4DSystemInfo.Distribution.PrettyName);
-    Writeln('Distribution.Release  : ' + TLX4DSystemInfo.Distribution.Release.ToString);
+    Writeln('Distribution.ID ..... : ' + TLX4DSystemInfo.Distribution.ID);
     Writeln('Distribution.BaseID . : ' + TLX4DSystemInfo.Distribution.BaseID);
     Writeln('Distribution.CodeName : ' + TLX4DSystemInfo.Distribution.CodeName);
+    Writeln('Distribution.Release  : ' + TLX4DSystemInfo.Distribution.Release.ToString);
     Writeln('Distribution.SrcFile  : ' + TLX4DSystemInfo.Distribution.SourceFile);
     {$IFDEF DEBUG}
     for var line in TLX4DSystemInfo.Distribution.Details do

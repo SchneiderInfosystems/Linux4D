@@ -31,7 +31,7 @@ uses
 type
   TLX4DSystemInfo = record
   public type
-    TDistributionKind = (Unknown, Ubuntu, Debian, RedHat, Fedora);
+    TDistributionKind = (Unknown, Ubuntu, Mint, Debian, RedHat, Fedora);
     TDistribution = record
       Kind: TDistributionKind;
       ID: string;
@@ -145,10 +145,13 @@ type
     class property EncodingStr: string read FEncodingStr;
 
     /// <summary>
-    /// Returns the character encoding in use (e.g., "UTF-8").
+    /// Returns the encoding class for the character encoding in use (e.g.,TEncoding.UTF8).
     /// </summary>
     class property Encoding: TEncoding read FEncoding;
 
+    /// <summary>
+    /// Returns the list of the current environment variables as key-value pairs.
+    /// </summary>
     class property EnvironmentVariables: TStringList read GetEnvironmentVariables;
 
     /// <summary>
@@ -298,11 +301,13 @@ begin
   end;
   if SameText(FDistribution.ID, 'Ubuntu') then
     FDistribution.Kind := Ubuntu
-  else if SameText(FDistribution.ID, 'debian') then
-    FDistribution.Kind := Debian
+  else if FDistribution.ID.Contains('linuxmint') then
+    FDistribution.Kind := Mint
   else if FDistribution.ID.Contains('rhel') then
     FDistribution.Kind := RedHat
-  else if FDistribution.ID.Contains('fedora') then
+  else if FDistribution.BaseID.Contains('debian') then
+    FDistribution.Kind := Debian
+  else if FDistribution.BaseID.Contains('fedora') then
     FDistribution.Kind := Fedora;
 end;
 
