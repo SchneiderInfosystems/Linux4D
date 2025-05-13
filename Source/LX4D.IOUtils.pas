@@ -51,7 +51,7 @@ type
     /// Returns an empty string if the path cannot be determined.
     /// </returns>
     /// <remarks>
-    /// This typically corresponds to the XDG_DESKTOP_DIR environment variable.
+    /// This corresponds to the XDG_DESKTOP_DIR environment variable.
     /// This function can also be executed when running with root rights.
     /// </remarks>
     class function GetDesktopPath: string; static;
@@ -64,7 +64,7 @@ type
     /// Returns an empty string if the path cannot be determined.
     /// </returns>
     /// <remarks>
-    /// This typically corresponds to the XDG_DOWNLOAD_DIR environment variable.
+    /// This corresponds to the XDG_DOWNLOAD_DIR environment variable.
     /// This function can also be executed when running with root rights.
     /// </remarks>
     class function GetDownloadsPath: string; static;
@@ -77,7 +77,7 @@ type
     /// Returns an empty string if the path cannot be determined.
     /// </returns>
     /// <remarks>
-    /// This typically corresponds to the XDG_PUBLICSHARE_DIR environment variable.
+    /// This corresponds to the XDG_PUBLICSHARE_DIR environment variable.
     /// This function can also be executed when running with root rights.
     /// </remarks>
     class function GetPublicPath: string; static;
@@ -90,7 +90,7 @@ type
     /// Returns an empty string if the path cannot be determined.
     /// </returns>
     /// <remarks>
-    /// This typically corresponds to the XDG_DOCUMENTS_DIR environment variable.
+    /// This corresponds to the XDG_DOCUMENTS_DIR environment variable.
     /// This function can also be executed when running with root rights.
     /// </remarks>
     class function GetDocumentsPath: string; static;
@@ -103,7 +103,7 @@ type
     /// Returns an empty string if the path cannot be determined.
     /// </returns>
     /// <remarks>
-    /// This typically corresponds to the XDG_MUSIC_DIR environment variable.
+    /// This corresponds to the XDG_MUSIC_DIR environment variable.
     /// This function can also be executed when running with root rights.
     /// </remarks>
     class function GetMusicPath: string; static;
@@ -116,7 +116,7 @@ type
     /// Returns an empty string if the path cannot be determined.
     /// </returns>
     /// <remarks>
-    /// This typically corresponds to the XDG_PICTURES_DIR environment variable.
+    /// This corresponds to the XDG_PICTURES_DIR environment variable.
     /// This function can also be executed when running with root rights.
     /// </remarks>
     class function GetPicturesPath: string; static;
@@ -129,7 +129,7 @@ type
     /// Returns an empty string if the path cannot be determined.
     /// </returns>
     /// <remarks>
-    /// This typically corresponds to the XDG_VIDEOS_DIR environment variable.
+    /// This corresponds to the XDG_VIDEOS_DIR environment variable.
     /// This function can also be executed when running with root rights.
     /// </remarks>
     class function GetMoviesPath: string; static;
@@ -166,7 +166,7 @@ type
     /// insufficient privileges to change permissions).
     /// </returns>
     /// <remarks>
-    /// This method typically corresponds to using the <c>chmod</c> command or the <c>chmod()</c> system call.
+    /// This method corresponds to using the <c>chmod</c> command or the <c>chmod()</c> system call.
     /// The current user must have the necessary privileges to change permissions on the specified file.
     /// </remarks>
     class function SetFilePermissions(const FilePath: string; User, Group, Other: TPermissions): boolean; static;
@@ -180,7 +180,7 @@ type
     /// insufficient privileges).
     /// </returns>
     /// <remarks>
-    /// This is a convenience function that typically sets the execute bit for all
+    /// This is a convenience function that sets the execute bit for all
     /// three categories (user, group, other), akin to <c>chmod a+x FilePath</c>.
     /// It effectively calls <see cref="SetFilePermissions"/> with the execute flag added to existing permissions
     /// for user, group, and other, or simply sets permissions like 755 if only execute is considered.
@@ -199,7 +199,7 @@ type
     /// ownership to a *different* user).
     /// </returns>
     /// <remarks>
-    /// This method typically corresponds to using the <c>chown</c> command or the <c>chown()</c> system call.
+    /// This method corresponds to using the <c>chown</c> command or the <c>chown()</c> system call.
     /// Changing ownership to an arbitrary user/group usually requires root privileges.
     /// This specific signature implies setting it to the *current effective user and group*.
     /// If you need to set specific user/group IDs, a different method signature would be required.
@@ -230,7 +230,7 @@ type
     /// command fails, insufficient privileges, file not found).
     /// </returns>
     /// <remarks>
-    /// This typically sets the <c>metadata::trusted</c> GIO attribute to 'true'.
+    /// This sets the <c>metadata::trusted</c> GIO attribute to 'true'.
     /// Marking a desktop entry file (.desktop) as trusted allows it to be launched without warnings
     /// in some desktop environments if it was downloaded or is not executable by default.
     /// Relies on the <c>gio set</c> command-line tool.

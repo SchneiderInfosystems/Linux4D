@@ -31,7 +31,14 @@ uses
 type
   TLX4DSystemInfo = record
   public type
+    /// <summary>
+    /// Defines a type to differentiate the Linux distribution. This list will be extended in the future.
+    /// </summary>
     TDistributionKind = (Unknown, Ubuntu, Mint, Debian, RedHat, Fedora);
+
+    /// <summary>
+    /// This record contains detailed information about the installed Linux distribution.
+    /// </summary>
     TDistribution = record
       Kind: TDistributionKind;
       ID: string;
@@ -44,6 +51,10 @@ type
       function KindStr: string;
       function ToJSON: TJSONObject;
     end;
+
+    /// <summary>
+    /// This record contains detailed information about the Linux kernel system.
+    /// </summary>
     TKernel = record
       SystemName: string;
       NodeName: string;
@@ -52,6 +63,10 @@ type
       function PrettyName: string;
       function ToJSON: TJSONObject;
     end;
+
+    /// <summary>
+    /// This record contains detailed information about the system hardware.
+    /// </summary>
     TCPU = record
       ModelName: string;
       VendorID: string;

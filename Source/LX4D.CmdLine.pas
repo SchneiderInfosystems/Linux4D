@@ -160,7 +160,7 @@ type
     /// The caller is responsible for freeing this <c>TStringList</c> instance.
     /// </returns>
     /// <remarks>
-    /// This method typically executes the script using a command like "bash [BashFile]".
+    /// This method executes the script using a command like "bash [BashFile]".
     /// Ensure the script file exists and has appropriate permissions if required by the OS.
     /// </remarks>
     /// <exception cref="ELX4DCmdLine">
@@ -177,7 +177,7 @@ type
     /// <param name="Options">A set of <see cref="TCmdOptions"/> to control execution behavior. Defaults to an empty set.</param>
     /// <returns>True if the script executed successfully (exit code 0), False otherwise.</returns>
     /// <remarks>
-    /// This method typically executes the script using a command like "bash [BashFile]".
+    /// This method executes the script using a command like "bash [BashFile]".
     /// Ensure the script file exists and has appropriate permissions.
     /// Unlike the overload returning <c>TStringList</c>, this method returns <c>False</c> for non-zero exit codes
     /// instead of raising an <see cref="ELX4DCmdLine"/> for that specific case. However, <see cref="ELX4DCmdLine"/>
@@ -198,7 +198,7 @@ type
     /// Script output and termination status are handled via the provided callback procedures.
     /// Ensure that <see cref="AppIsTerminated"/> is checked within callbacks if the application
     /// might close while the asynchronous script is running.
-    /// The script is typically executed via "bash [BashFile]".
+    /// The script is executed via "bash [BashFile]".
     /// </remarks>
     /// <exception cref="ELX4DCmdLine">
     /// May be raised if the process cannot be started (e.g., script not found).
