@@ -1,4 +1,5 @@
 const
+  cLibEdition = 'Linux4D';
   cLibMajorVersion = 0;
   cLibMinorVersion = 99;
   cLibReleaseVersion = 0;

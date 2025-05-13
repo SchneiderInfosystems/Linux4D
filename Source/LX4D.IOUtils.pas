@@ -44,10 +44,19 @@ type
     class function GetMoviesPath: string; static;
   end;
 
+  TLX4DFile = record
+    class function MakeFileExecutable(const FilePath: string): boolean; static;
+    class function SetOwnerShip(const FilePath: string): boolean; static;
+
+    class function GetGIOInfo(const FilePath: string): TStringList; static;
+    class function MarkFileTrusted(const FilePath: string): boolean; static;
+  end;
+
 implementation
 
 uses
-  LX4D.SystemInfo;
+  LX4D.SystemInfo, LX4D.CmdLine,
+  Posix.Unistd, Posix.Pwd, Posix.SysStat;
 
 const
   // System Files
@@ -128,6 +137,37 @@ begin
   result := FUserDirs.Values[Key];
   if not result.IsEmpty then
     result := StringReplace(result.DeQuotedString('"'), '$' + HOME, HomeDir, []);
+end;
+
+{ TLX4DFile }
+
+class function TLX4DFile.MakeFileExecutable(const FilePath: string): boolean;
+begin
+  result := chmod(PAnsiChar(AnsiString(FilePath)),
+    S_IRUSR or S_IWUSR or S_IXUSR or  // User: rwx
+    S_IRGRP or S_IWGRP or S_IXGRP or  // Group: rwx
+    S_IROTH or S_IXOTH) = 0;          // Other: r-x
+end;
+
+class function TLX4DFile.SetOwnerShip(const FilePath: string): boolean;
+var
+  pwd: PPasswd;
+begin
+  pwd := getpwnam(PAnsiChar(AnsiString(TLX4DSystemInfo.UserName)));
+  if Assigned(pwd) then
+    result := chown(PAnsiChar(AnsiString(FilePath)), pwd^.pw_uid, pwd^.pw_gid) = 0
+  else
+    result := false;
+end;
+
+class function TLX4DFile.GetGIOInfo(const FilePath: string): TStringList;
+begin
+  raise ELX4DCmdLine.Create(rsFunctionAvailableInExtendedLinux4DOnly);
+end;
+
+class function TLX4DFile.MarkFileTrusted(const FilePath: string): boolean;
+begin
+  raise ELX4DCmdLine.Create(rsFunctionAvailableInExtendedLinux4DOnly);
 end;
 
 end.

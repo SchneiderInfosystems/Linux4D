@@ -203,8 +203,11 @@
         <DelphiCompile Include="$(MainSource)">
             <MainSource>MainSource</MainSource>
         </DelphiCompile>
-        <DCCReference Include="..\Source\LX4D.IOUtils.pas"/>
         <DCCReference Include="..\Source\LX4D.SystemInfo.pas"/>
+        <DCCReference Include="..\source\LX4D.CmdLine.pas"/>
+        <DCCReference Include="..\source\LX4D.IOUtils.pas"/>
+        <DCCReference Include="..\source\LX4D.NetInfo.pas"/>
+        <DCCReference Include="..\source\LX4D.PackageManager.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>

@@ -29,9 +29,13 @@ program LX4DDemoConsoleApp;
 {$R *.res}
 
 uses
-  System.SysUtils, System.Classes,
-  LX4D.IOUtils in '..\Source\LX4D.IOUtils.pas',
-  LX4D.SystemInfo in '..\Source\LX4D.SystemInfo.pas';
+  System.SysUtils,
+  System.Classes,
+  LX4D.SystemInfo in '..\Source\LX4D.SystemInfo.pas',
+  LX4D.CmdLine in '..\source\LX4D.CmdLine.pas',
+  LX4D.IOUtils in '..\source\LX4D.IOUtils.pas',
+  LX4D.NetInfo in '..\source\LX4D.NetInfo.pas',
+  LX4D.PackageManager in '..\source\LX4D.PackageManager.pas';
 
 begin
   {$IFDEF DEBUG}

@@ -198,7 +198,7 @@ end;
 
 class function TLX4DSystemInfo.GetLibVersion: string;
 begin
-  result := cLibMajorVersion.ToString + '.' + cLibMinorVersion.ToString + '.' + cLibReleaseVersion.ToString + '.' +
+  result := cLibEdition + ' V' + cLibMajorVersion.ToString + '.' + cLibMinorVersion.ToString + '.' + cLibReleaseVersion.ToString + '.' +
     cLibBuildVersion.ToString;
 end;
 
