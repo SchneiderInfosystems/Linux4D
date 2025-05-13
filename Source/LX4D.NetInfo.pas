@@ -30,14 +30,61 @@ uses
   LX4D.SystemInfo, LX4D.CmdLine;
 
 type
-  TLX4DNetInfo = class
+  /// <summary>
+  /// Provides static helper methods to retrieve network interface information,
+  /// primarily focused on IP addresses.
+  /// </summary>
+  /// <remarks>
+  /// This record can be used to list available IPv4 and IPv6 addresses on the host system.
+  /// It includes an optional logging callback for diagnostic purposes during information retrieval.
+  /// </remarks>
+  TLX4DNetInfo = record
   public type
+    /// <summary>
+    /// Callback procedure for logging diagnostic messages during network information retrieval.
+    /// </summary>
+    /// <param name="Log">The log message string.</param>
     TOnLog = reference to procedure(const Log: string);
   private
-    class function GetIPAddr(const cInet: string; Log: TOnLog = nil): TStringList;
+    class function GetIPAddr(const cInet: string; Log: TOnLog = nil): TStringList; static;
   public
-    class function GetIPv4Addr(Log: TOnLog = nil): TStringList;
-    class function GetIPv6Addr(Log: TOnLog = nil): TStringList;
+    /// <summary>
+    /// Retrieves a list of active IPv4 addresses on the system.
+    /// </summary>
+    /// <param name="Log">
+    ///   An optional <see cref="TOnLog"/> callback procedure to receive diagnostic messages
+    ///   during the address retrieval process. Defaults to nil if not provided.
+    /// </param>
+    /// <returns>
+    /// A <c>TStringList</c> containing the IPv4 addresses found on active network interfaces.
+    /// Each string in the list represents one IPv4 address (e.g., "192.168.1.10").
+    /// Returns an empty <c>TStringList</c> if no IPv4 addresses are found or if an error occurs.
+    /// The caller is responsible for freeing the returned <c>TStringList</c>.
+    /// </returns>
+    /// <remarks>
+    /// This method iterates through network interfaces and extracts their IPv4 configurations.
+    /// Loopback addresses (e.g., "127.0.0.1") are not be included in the list.
+    /// </remarks>
+    class function GetIPv4Addr(Log: TOnLog = nil): TStringList; static;
+
+    /// <summary>
+    /// Retrieves a list of active IPv6 addresses on the system.
+    /// </summary>
+    /// <param name="Log">
+    ///   An optional <see cref="TOnLog"/> callback procedure to receive diagnostic messages
+    ///   during the address retrieval process. Defaults to nil if not provided.
+    /// </param>
+    /// <returns>
+    /// A <c>TStringList</c> containing the IPv6 addresses found on active network interfaces.
+    /// Each string in the list represents one IPv6 address (e.g., "fe80::a00:27ff:fe34:5678%eth0").
+    /// Returns an empty <c>TStringList</c> if no IPv6 addresses are found or if an error occurs.
+    /// The caller is responsible for freeing the returned <c>TStringList</c>.
+    /// </returns>
+    /// <remarks>
+    /// This method iterates through network interfaces and extracts their IPv6 configurations.
+    /// Loopback addresses are not be included in the list.
+    /// </remarks>
+    class function GetIPv6Addr(Log: TOnLog = nil): TStringList; static;
   end;
 
 implementation
