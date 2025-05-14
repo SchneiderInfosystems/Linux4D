@@ -9,6 +9,7 @@ The open-source version of Linux4D helps you:
 - Detect the system's active encoding.
 - Determine the specific Linux distribution and its version.
 - Retrieve information about the Linux kernel and CPU hardware.
+- Helper function to retrieve system paths and handling of file permissions. 
 
 ## Getting Started
 
