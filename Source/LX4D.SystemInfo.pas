@@ -65,7 +65,7 @@ type
     end;
 
     /// <summary>
-    /// This record contains detailed information about the system hardware.
+    /// This record contains detailed information about the CPUs.
     /// </summary>
     TCPU = record
       ModelName: string;
@@ -77,6 +77,21 @@ type
       Details: TStringList;
       function PrettyName: string;
       function ToJSON: TJSONObject;
+    end;
+
+    /// <summary>
+    /// This record contains detailed information about the system memory.
+    /// </summary>
+    TMemory = record
+      Total: Int64;
+      Free: Int64;
+      Available: Int64; // This value not only takes into account the completely free memory (Free),
+                        // but also the memory that can be reclaimed in the short term by releasing caches and buffers
+      Buffers: Int64;
+      Cached: Int64;
+      Details: TStringList;
+      function PrettyFormat: string;
+      class operator Finalize(var Dest: TMemory);
     end;
   private
     class var FUID: cardinal;
@@ -99,6 +114,7 @@ type
     class function ReadProcFile(const FilePath: string): TStringList; static;
     class function YesNoStrToBool(const BoolStr: string): boolean; static;
     class function GetEnvironmentVariables: TStringList; static;
+    class function GetMemory: TMemory; static;
     class function GetLibVersion: string; static;
   public
     class constructor Create;
@@ -138,6 +154,11 @@ type
     /// Returns information about the CPU, including model, speed, cache, and core count.
     /// </summary>
     class property CPU: TCPU read FCPU;
+
+    /// <summary>
+    /// Returns information about the current Memory state.
+    /// </summary>
+    class property Memory: TMemory read GetMemory;
 
     /// <summary>
     /// Returns the current language in a human-readable format (e.g., "English (United States)").
@@ -187,6 +208,7 @@ const
   OSReleaseFile = '/etc/os-release';
   LSBReleaseFile = '/etc/lsb-release';
   CPUINFO = '/proc/cpuinfo';
+  MEMINFO = '/proc/meminfo';
 
   // Sytem Environment Variables
   PKEXEC_UID = 'PKEXEC_UID';
@@ -905,6 +927,48 @@ begin
     FCPU.Details.Add('File not found: ' + CPUINFO);
 end;
 
+class function TLX4DSystemInfo.GetMemory: TMemory;
+
+  function ExtractInBytes(SizeWithUnit: string): Int64;
+  begin
+    if SizeWithUnit.EndsWith(' kB', true) then
+      result := StrToInt64Def(SizeWithUnit.Substring(0, SizeWithUnit.Length - 3), 0) * 1024
+    else
+      // unexpected unit !
+      result := 0;
+  end;
+var
+  Line, Key, Value: string;
+  Details: TStringList;
+  strs: TArray<string>;
+begin
+  result.Details := TStringList.Create;
+  if FileExists(MEMINFO) then
+  begin
+    Details := ReadProcFile(MEMINFO);
+    for Line in Details do
+    begin
+      strs := Line.Split([':']);
+      if length(Strs) >= 2 then
+      begin
+        Key := trim(strs[0]);
+        Value := trim(strs[1]);
+        result.Details.Add(Key + '=' + Value);
+        if SameText(Key, 'MemTotal') then
+          result.Total := ExtractInBytes(Value)
+        else if SameText(Key, 'MemFree') then
+          result.Free := ExtractInBytes(Value)
+        else if SameText(Key, 'MemAvailable') then
+          result.Available := ExtractInBytes(Value)
+        else if SameText(Key, 'Buffers') then
+          result.Buffers := ExtractInBytes(Value)
+        else if SameText(Key, 'Cached') then
+          result.Cached := ExtractInBytes(Value);
+      end;
+    end;
+  end;
+end;
+
 class function TLX4DSystemInfo.ToJSON: TJSONObject;
 begin
   result := TJSONObject.Create(TJSONPair.Create('UserID', FUID)).
@@ -969,6 +1033,37 @@ begin
     AddPair('Release', Release).
     AddPair('Details', Details.CommaText).
     AddPair('SourceFile', SourceFile);
+end;
+
+{ TLX4DSystemInfo.TMemory }
+
+class operator TLX4DSystemInfo.TMemory.Finalize(var Dest: TMemory);
+begin
+  FreeAndNil(Dest.Details);
+end;
+
+function TLX4DSystemInfo.TMemory.PrettyFormat: string;
+
+  function GetBytesInBestUnit(Val: Int64): string;
+  const
+    ByteinKiloBytes: Int64 = 1024;
+    ByteinMegaBytes: Int64 = 1024 * 1024;
+    ByteinGigaBytes: Int64 = 1024 * 1024 * 1024;
+  begin
+    if Val < 2 * ByteinKiloBytes then
+      result := Format('%d B', [Val])
+    else if Val < 2 * ByteinMegaBytes then
+      result := Format('%5.1f KB', [Val / ByteinKiloBytes])
+    else if Val < 2 * ByteinGigaBytes then
+      result := Format('%5.1f MB', [Val / ByteinMegaBytes])
+    else
+      result := Format('%5.1f GB', [Val / ByteinGigaBytes]);
+  end;
+
+begin
+  result := Format('Total: %s, Free: %s, Available: %s, Buffers: %s, Cached: %s',
+    [GetBytesInBestUnit(Total), GetBytesInBestUnit(Free), GetBytesInBestUnit(Available),
+     GetBytesInBestUnit(Buffers), GetBytesInBestUnit(Cached)]);
 end;
 
 end.

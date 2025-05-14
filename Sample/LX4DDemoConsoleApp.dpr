@@ -58,6 +58,11 @@ begin
     for var line in TLX4DSystemInfo.CPU.Details do
       Writeln('  ' + line);
     {$ENDIF}
+    Writeln('Memory .............. : ' + TLX4DSystemInfo.Memory.PrettyFormat);
+    {$IFDEF DEBUG}
+    for var line in TLX4DSystemInfo.Memory.Details do
+      Writeln('  ' + line);
+    {$ENDIF}
     Writeln('Distribution ........ : ' + TLX4DSystemInfo.Distribution.PrettyName);
     Writeln('Distribution.ID ..... : ' + TLX4DSystemInfo.Distribution.ID);
     Writeln('Distribution.BaseID . : ' + TLX4DSystemInfo.Distribution.BaseID);
