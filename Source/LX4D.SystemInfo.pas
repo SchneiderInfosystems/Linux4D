@@ -217,6 +217,7 @@ const
   LOGNAME = 'LOGNAME';
   USER = 'USER';
   LANG = 'LANG';
+  DefaultLocale = '<default locale>';
 
 class constructor TLX4DSystemInfo.Create;
 begin
@@ -397,7 +398,9 @@ end;
 class function TLX4DSystemInfo.GetLanguagePretty: string;
 begin
   result := ''; // Fallback
-  if SameText(FLanguage, 'en') then
+  if FLanguage = 'C' then
+    FLanguage := DefaultLocale
+  else if SameText(FLanguage, 'en') then
   begin
     if SameText(FRegion, 'US') then
       result := 'English (United States)'
