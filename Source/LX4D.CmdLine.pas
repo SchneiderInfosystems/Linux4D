@@ -27,7 +27,9 @@ interface
 
 uses
   System.Classes, System.SysUtils,
-{$IF Defined(FMX)}
+{$IF Defined(VCL)}
+  VCL.Forms,
+{$ELSEIF Defined(FMX)}
   FMX.Forms,
 {$ENDIF}
   Posix.Base,

@@ -117,6 +117,40 @@ type
     /// </exception>
     class procedure InstallPackage(const PackageName: string; OnPackageInstalled: TOnPackageInstalled;
       OnLog: TLX4DCmdLine.TOnNewLine = nil); static;
+	  
+    /// <summary>
+    /// Initiates the full update of the installer 
+    /// </summary>
+    /// <param name="OnPackageInstallerUpdated">
+    ///   The <see cref="TOnPackageInstalled"/> callback procedure that will be invoked
+    ///   once the installation attempt is complete (either successfully or with an error).
+    /// </param>
+    /// <param name="SingleStep">
+    ///   Do the upgrade in one single step (recommended) or start it step by step. When using the single step
+	///   option, the user need to enter the password just once.
+    /// </param>
+    /// <param name="OnLog">
+    ///   An optional <see cref="TLX4DCmdLine.TOnNewLine"/> callback to receive real-time
+    ///   output (stdout/stderr) from the package manager command during the installation process.
+    ///   Defaults to nil if not provided.
+    /// </param>
+    /// <remarks>
+    /// This procedure uses the command obtained from <see cref="GetLinuxInstallerCommand"/>
+    /// to execute the installer update (e.g. firstly "sudo apt-get update", secondly "sudo apt-get upgrade" 
+	/// and finally "sudo apt-get dist-upgrade").
+    /// The installation process is performed asynchronously; this method will return before
+    /// the installation is complete. The result is reported via the <c>OnPackageInstallerUpdated</c> callback.
+    /// Root privileges are generally required for package installer update, and the underlying
+    /// command execution handle this. That is why the user needs to enter their password.
+    /// </remarks>
+    /// <exception cref="ELX4DPackageManager">
+    /// May be raised if the package installer command cannot be determined,
+    /// or if there's an issue initiating the installation process (e.g., failure to start the command).
+    /// Errors during the actual installer update are reported via the
+    /// <c>Error</c> parameter of the <c>OnPackageInstallerUpdated</c> callback.
+    /// </exception>
+    class procedure UpdatePackageInstaller(OnPackageInstallerUpdated: TOnPackageInstalled;
+      SingleStep: boolean = true; OnLog: TLX4DCmdLine.TOnNewLine = nil); static;
   end;
 
 implementation
@@ -135,6 +169,13 @@ begin
 end;
 
 class procedure TLX4DPackageManager.InstallPackage(const PackageName: string; OnPackageInstalled: TOnPackageInstalled;
+  OnLog: TLX4DCmdLine.TOnNewLine);
+begin
+  raise ELX4DCmdLine.Create(rsFunctionAvailableInExtendedLinux4DOnly);
+end;
+
+class procedure TLX4DPackageManager.UpdatePackageInstaller(
+  OnPackageInstallerUpdated: TOnPackageInstalled; SingleStep: boolean;
   OnLog: TLX4DCmdLine.TOnNewLine);
 begin
   raise ELX4DCmdLine.Create(rsFunctionAvailableInExtendedLinux4DOnly);
