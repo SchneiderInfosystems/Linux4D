@@ -160,7 +160,16 @@ uses
 
 class function TLX4DPackageManager.GetLinuxInstallerCommand: string;
 begin
-  raise ELX4DCmdLine.Create(rsFunctionAvailableInExtendedLinux4DOnly);
+  result := '';
+  case TLX4DSystemInfo.Distribution.Kind of
+    Ubuntu,
+    Mint,
+    Debian:
+      result := 'apt-get';
+    RedHat,
+    Fedora:
+      result := 'yum';
+  end;
 end;
 
 class function TLX4DPackageManager.GetInstalledPackages: TStringList;
