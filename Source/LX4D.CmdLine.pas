@@ -33,7 +33,8 @@ uses
   FMX.Forms,
 {$ENDIF}
   Posix.Base,
-  Posix.Fcntl;
+  Posix.Fcntl,
+  Posix.Stdlib;
 
 type
   /// <summary>
@@ -99,6 +100,16 @@ type
     /// determine if they should gracefully stop processing.
     /// </returns>
     class function AppIsTerminated: boolean; static;
+
+    /// <summary>
+    /// Starts a command line without waiting until the application ended.
+    /// </summary>
+    /// <param name="Command">The command line string to execute (e.g., "reboot").</param>
+    /// <param name="RunWithRootPrivileges">Flag if root rights are required.</param>
+    /// <returns>
+    /// Returns true if the command has successful started.
+    /// </returns>
+   class function StartCommand(const Command: string; RunWithRootPrivileges: boolean = false): boolean; static;
 
     /// <summary>
     /// Executes a command line synchronously and returns all its output lines as a <c>TStringList</c>.
@@ -227,6 +238,17 @@ begin
 {$ELSE}
   result := false;
 {$ENDIF}
+end;
+
+class function TLX4DCmdLine.StartCommand(const Command: string; RunWithRootPrivileges: boolean): boolean;
+var
+  Cmd: AnsiString;
+begin
+  if RunWithRootPrivileges then
+    Cmd := 'pkexec ' + AnsiString(Command)
+  else
+    Cmd := AnsiString(Command);
+  result := _system(PAnsiChar(Cmd)) = 0;
 end;
 
 class function TLX4DCmdLine.ExecuteCommandLineSynch(const Command: string; Options: TCmdOptions): TStringList;

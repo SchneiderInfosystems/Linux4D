@@ -1,0 +1,48 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <ProjectGuid>{21AF52A3-9850-418C-9C10-E5A9482F74D9}</ProjectGuid>
+    </PropertyGroup>
+    <ItemGroup>
+        <Projects Include="LX4DDemoConsoleApp.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="LX4DDemoAppWithRootRights.dproj">
+            <Dependencies/>
+        </Projects>
+    </ItemGroup>
+    <ProjectExtensions>
+        <Borland.Personality>Default.Personality.12</Borland.Personality>
+        <Borland.ProjectType/>
+        <BorlandProject>
+            <Default.Personality/>
+        </BorlandProject>
+    </ProjectExtensions>
+    <Target Name="LX4DDemoConsoleApp">
+        <MSBuild Projects="LX4DDemoConsoleApp.dproj"/>
+    </Target>
+    <Target Name="LX4DDemoConsoleApp:Clean">
+        <MSBuild Projects="LX4DDemoConsoleApp.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="LX4DDemoConsoleApp:Make">
+        <MSBuild Projects="LX4DDemoConsoleApp.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="LX4DDemoAppWithRootRights">
+        <MSBuild Projects="LX4DDemoAppWithRootRights.dproj"/>
+    </Target>
+    <Target Name="LX4DDemoAppWithRootRights:Clean">
+        <MSBuild Projects="LX4DDemoAppWithRootRights.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="LX4DDemoAppWithRootRights:Make">
+        <MSBuild Projects="LX4DDemoAppWithRootRights.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="Build">
+        <CallTarget Targets="LX4DDemoConsoleApp;LX4DDemoAppWithRootRights"/>
+    </Target>
+    <Target Name="Clean">
+        <CallTarget Targets="LX4DDemoConsoleApp:Clean;LX4DDemoAppWithRootRights:Clean"/>
+    </Target>
+    <Target Name="Make">
+        <CallTarget Targets="LX4DDemoConsoleApp:Make;LX4DDemoAppWithRootRights:Make"/>
+    </Target>
+    <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
+</Project>

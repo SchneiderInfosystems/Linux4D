@@ -49,10 +49,17 @@ begin
       Writeln('Application runs with root rights')
     else
       Writeln('Application runs without root rights');
-    Writeln('Current User ID ..... : ' + TLX4DSystemInfo.UserID.ToString);
     Writeln('Language ............ : ' + TLX4DSystemInfo.LanguagePretty);
     Writeln('Encoding ............ : ' + TLX4DSystemInfo.EncodingStr);
+    Writeln('Current User ID ..... : ' + TLX4DSystemInfo.UserID.ToString);
     Writeln('Current User Name ... : ' + TLX4DSystemInfo.UserName);
+    Writeln('User list ........... : ' + TLX4DSystemInfo.UserNames.CommaText);
+    {$IFDEF DEBUG}
+    var User: TLX4DSystemInfo.TUser;
+    for var UID in TLX4DSystemInfo.UserIDs do
+      if TLX4DSystemInfo.GetUser(UID, User) then
+        Writeln('  ' + User.ToJSON.ToString);
+    {$ENDIF}
     Writeln('Kernel .............. : ' + TLX4DSystemInfo.Kernel.PrettyName);
     Writeln('CPU ................. : ' + TLX4DSystemInfo.CPU.PrettyName);
     {$IFDEF DEBUG}
