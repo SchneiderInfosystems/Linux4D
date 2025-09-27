@@ -244,7 +244,7 @@ class function TLX4DCmdLine.StartCommand(const Command: string; RunWithRootPrivi
 var
   Cmd: AnsiString;
 begin
-  if RunWithRootPrivileges then
+  if RunWithRootPrivileges and not TLX4DSystemInfo.RunWithRootRights then
     Cmd := 'pkexec ' + AnsiString(Command)
   else
     Cmd := AnsiString(Command);

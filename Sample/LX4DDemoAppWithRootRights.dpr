@@ -39,8 +39,10 @@ begin
     begin
       writeln('Started without root privileges -> restart');
       TLX4DCmdLine.StartCommand(ParamStr(0), true)
-    end else
+    end else begin
       writeln('Started with root privileges');
+      writeln('Add your code here!!');
+    end;
   except
     on E: Exception do
       Writeln(E.ClassName, ': ', E.Message);
