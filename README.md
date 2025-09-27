@@ -6,10 +6,13 @@ Linux4D is an open-source Delphi library designed to simplify system-oriented pr
 
 The open-source version of Linux4D helps you:
 - Identify the installed system language and region.
+- Get the list of the installed user 
 - Detect the system's active encoding.
 - Determine the specific Linux distribution and its version.
 - Retrieve information about the Linux kernel and CPU hardware.
-- Helper function to retrieve system paths and handling of file permissions. 
+- Helper function to retrieve system paths and handling of file permissions.
+- Check if an application is running with root rights.
+- Elevated start with root rights.
 
 ## Getting Started
 
@@ -47,4 +50,4 @@ Interested in **Extended Linux4D**?
 
 For inquiries, tailored solutions, and quotes, please contact us at delphi@schneider-infosys.ch.
 
-May 2025, Schneider Infosystems AG, Switzerland
+Sep 2025, Schneider Infosystems AG, Switzerland
