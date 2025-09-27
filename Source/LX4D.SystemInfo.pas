@@ -26,7 +26,7 @@ unit LX4D.SystemInfo;
 interface
 
 uses
-  System.Types, System.Classes, System.SysUtils, System.RTTI, System.JSON;
+  System.Types, System.Classes, System.SysUtils, System.RTTI, System.JSON, System.Generics.Collections;
 
 type
   TLX4DSystemInfo = record
@@ -51,6 +51,23 @@ type
       function KindStr: string;
       function ToJSON: TJSONObject;
     end;
+
+    /// <summary>
+    /// This record contains detailed information about the registered user.
+    /// </summary>
+    TUser = record
+      UserName: string;
+      UserID: cardinal;
+      GroupID: cardinal;
+      RealName: string;
+      HomeDirectory: string;
+      ShellProgram: string;
+      function IsInteractiveUser: boolean;
+      function IsCurrentUser: boolean;
+      function ToJSON: TJSONObject;
+    end;
+    TUsers = TList<TUser>;
+    TUserIDs = TList<cardinal>;
 
     /// <summary>
     /// This record contains detailed information about the Linux kernel system.
@@ -97,6 +114,9 @@ type
     class var FUID: cardinal;
     class var FRunWithRootRights: boolean;
     class var FUserName: string;
+    class var FUserNameList: TStringList;
+    class var FUserNamesWithUID: TStringList;
+    class var FUserIDs: TUserIDs;
     class var FDistribution: TDistribution;
     class var FKernel: TKernel;
     class var FCPU: TCPU;
@@ -106,16 +126,19 @@ type
     class var FEncodingStr: string;
     class procedure FetchUser; static;
     class procedure FetchUserWithRootRights; static;
+    class function GetUserNames: TStringList; static;
+    class function GetUserNamesWithUID: TStringList; static;
+    class function GetUserIDs: TUserIDs; static;
     class procedure FetchLinuxDistribution; static;
     class procedure FetchKernel; static;
     class procedure FetchCPU; static;
     class procedure FetchLanguage; static;
     class function GetLanguagePretty: string; static;
-    class function ReadProcFile(const FilePath: string): TStringList; static;
-    class function YesNoStrToBool(const BoolStr: string): boolean; static;
     class function GetEnvironmentVariables: TStringList; static;
     class function GetMemory: TMemory; static;
     class function GetLibVersion: string; static;
+    class function ReadProcFile(const FilePath: string): TStringList; static;
+    class function YesNoStrToBool(const BoolStr: string): boolean; static;
   public
     class constructor Create;
     class destructor Destroy;
@@ -191,6 +214,49 @@ type
     class property EnvironmentVariables: TStringList read GetEnvironmentVariables;
 
     /// <summary>
+    /// Returns the list of the names of all installed user on this system.
+    /// </summary>
+    /// <remark>
+    /// The UserNames must not be freed. This job is solved by TLX4DSystemInfo.
+    /// </remark>
+    class property UserNames: TStringList read GetUserNames;
+
+    /// <summary>
+    /// Returns the list of the user ID of all installed user on this system.
+    /// </summary>
+    /// <remark>
+    /// The UserIDs must not be freed. This job is solved by TLX4DSystemInfo.
+    /// </remark>
+    class property UserIDs: TUserIDs read GetUserIDs;
+
+    /// <summary>
+    /// Returns the list of all installed user on this system as key-value pairs (UserName=UserID).
+    /// </summary>
+    /// <remark>
+    /// The UserNamesWithUserID must not be freed. This job is solved by TLX4DSystemInfo.
+    /// </remark>
+    class property UserNamesWithUserID: TStringList read GetUserNamesWithUID;
+
+    /// <summary>
+    /// Fetches the details of an installed user on this system.
+    /// </summary>
+    /// <returns>
+    /// Returns true if the given UserID was found and the details is returned in the record User.
+    /// </returns>
+    class function GetUser(UserID: cardinal; var User: TUser): boolean; static;
+
+    /// <summary>
+    /// Fetches the list of all installed user on this system.
+    /// </summary>
+    /// <returns>
+    /// Returns true if the given UserID was found and the details is returned in the record User.
+    /// </returns>
+    /// <remark>
+    /// The resulting TUsers must be freed. This job is NOT solved by TLX4DSystemInfo.
+    /// </remark>
+    class function GetUserList(OnlyInteractiveUsers: boolean = false): TUsers; static;
+
+    /// <summary>
     /// Returns the version number of the LX4D library.
     /// </summary>
     class property LibVersion: string read GetLibVersion;
@@ -226,10 +292,16 @@ begin
   FetchLinuxDistribution;
   FetchKernel;
   FetchCPU;
+  FUserNameList := nil;
+  FUserNamesWithUID := nil;
+  FUserIDs := nil;
 end;
 
 class destructor TLX4DSystemInfo.Destroy;
 begin
+  FreeAndNil(FUserIDs);
+  FreeAndNil(FUserNamesWithUID);
+  FreeAndNil(FUserNameList);
   FreeAndNil(FDistribution.Details);
   FreeAndNil(FCPU.Details);
 end;
@@ -240,66 +312,7 @@ begin
     cLibBuildVersion.ToString;
 end;
 
-class procedure TLX4DSystemInfo.FetchUser;
-var
-  pw: PPasswd;
-begin
-  FUID := geteuid;
-  FRunWithRootRights := FUID = 0;
-  if FRunWithRootRights then
-    FetchUserWithRootRights
-  else begin
-    pw := getpwuid(FUID);
-    if assigned(pw) then
-      FUserName := string(pw^.pw_name)
-    else
-      FUserName := '';
-  end;
-end;
-
-class procedure TLX4DSystemInfo.FetchUserWithRootRights;
-var
-  Env: PAnsiChar;
-  pw: PPasswd;
-begin
-  FUserName := '?'; // Fallback
-  Env := getenv(PKEXEC_UID);
-  if assigned(Env) then
-  begin
-    FUID := StrToIntDef(string(Env), -1);
-    if FUID > 0 then
-    begin
-      pw := getpwuid(FUID);
-      if assigned(pw) then
-      begin
-        FUserName := string(pw^.pw_name);
-        exit;
-      end;
-    end;
-  end;
-  Env := getenv(SUDO_USER);
-  if assigned(Env) then
-  begin
-    FUserName := string(Env);
-    Env := getenv(SUDO_UID);
-    if assigned(Env) then
-    begin
-      FUID := StrToIntDef(string(Env), -1);
-      exit;
-    end;
-  end
-  else begin
-    Env := getenv(LOGNAME);
-    if assigned(Env) then
-      FUserName := string(Env)
-    else begin
-      Env := getenv(USER);
-      if assigned(Env) then
-        FUserName := string(Env);
-    end;
-  end;
-end;
-
+{$REGION 'Distribution'}
 class procedure TLX4DSystemInfo.FetchLinuxDistribution;
 var
   fs: TFormatSettings;
@@ -348,6 +361,7 @@ begin
   else if FDistribution.BaseID.Contains('fedora') then
     FDistribution.Kind := Fedora;
 end;
+{$ENDREGION}
 
 {$REGION 'Kernel'}
 class procedure TLX4DSystemInfo.FetchKernel;
@@ -861,33 +875,7 @@ begin
 end;
 {$ENDREGION}
 
-class function TLX4DSystemInfo.ReadProcFile(const FilePath: string): TStringList;
-var
-  F: TextFile;
-  Line: string;
-begin
-  result := TStringList.Create;
-  AssignFile(F, FilePath);
-  Reset(F);
-  try
-    while not Eof(F) do
-    begin
-      ReadLn(F, Line);
-      result.Add(Line);
-    end;
-  finally
-    CloseFile(F);
-  end;
-end;
-
-class function TLX4DSystemInfo.YesNoStrToBool(const BoolStr: string): boolean;
-begin
-  if SameText(BoolStr, 'yes') or SameText(BoolStr, 'true') then
-    result := true
-  else
-    result := false;
-end;
-
+{$REGION 'CPU and Memory'}
 class procedure TLX4DSystemInfo.FetchCPU;
 var
   Line, Key, Value: string;
@@ -971,6 +959,196 @@ begin
     end;
   end;
 end;
+{$ENDREGION}
+
+{$REGION 'User'}
+class procedure TLX4DSystemInfo.FetchUser;
+var
+  pw: PPasswd;
+begin
+  FUID := geteuid;
+  FRunWithRootRights := FUID = 0;
+  if FRunWithRootRights then
+    FetchUserWithRootRights
+  else begin
+    pw := getpwuid(FUID);
+    if assigned(pw) then
+      FUserName := string(pw^.pw_name)
+    else
+      FUserName := '';
+  end;
+end;
+
+class procedure TLX4DSystemInfo.FetchUserWithRootRights;
+var
+  Env: PAnsiChar;
+  pw: PPasswd;
+begin
+  FUserName := '?'; // Fallback
+  Env := getenv(PKEXEC_UID);
+  if assigned(Env) then
+  begin
+    FUID := StrToIntDef(string(Env), -1);
+    if FUID > 0 then
+    begin
+      pw := getpwuid(FUID);
+      if assigned(pw) then
+      begin
+        FUserName := string(pw^.pw_name);
+        exit;
+      end;
+    end;
+  end;
+  Env := getenv(SUDO_USER);
+  if assigned(Env) then
+  begin
+    FUserName := string(Env);
+    Env := getenv(SUDO_UID);
+    if assigned(Env) then
+    begin
+      FUID := StrToIntDef(string(Env), -1);
+      exit;
+    end;
+  end
+  else begin
+    Env := getenv(LOGNAME);
+    if assigned(Env) then
+      FUserName := string(Env)
+    else begin
+      Env := getenv(USER);
+      if assigned(Env) then
+        FUserName := string(Env);
+    end;
+  end;
+end;
+
+class function TLX4DSystemInfo.GetUserIDs: TUserIDs;
+var
+  pws: Ppasswd;
+begin
+  if not assigned(FUserIDs) then
+    FUserIDs := TUserIDs.Create
+  else
+    FUserIDs.Clear;
+  result := FUserIDs;
+  setpwent;
+  repeat
+    pws := getpwent();
+    if assigned(pws) then
+      result.Add(pws.pw_uid);
+  until pws = nil;
+end;
+
+class function TLX4DSystemInfo.GetUserNames: TStringList;
+var
+  pws: Ppasswd;
+begin
+  if not assigned(FUserNameList) then
+    FUserNameList := TStringList.Create
+  else
+    FUserNameList.Clear;
+  result := FUserNameList;
+  setpwent;
+  repeat
+    pws := getpwent();
+    if assigned(pws) then
+      result.Add(string(pws.pw_name));
+  until pws = nil;
+end;
+
+class function TLX4DSystemInfo.GetUserNamesWithUID: TStringList;
+var
+  pws: Ppasswd;
+begin
+  if not assigned(FUserNamesWithUID) then
+    FUserNamesWithUID := TStringList.Create
+  else
+    FUserNamesWithUID.Clear;
+  result := FUserNamesWithUID;
+  setpwent;
+  repeat
+    pws := getpwent();
+    if assigned(pws) then
+      result.Add(string(pws.pw_name) + '=' + pws.pw_uid.ToString);
+  until pws = nil;
+end;
+
+class function TLX4DSystemInfo.GetUserList(OnlyInteractiveUsers: boolean): TUsers;
+var
+  pws: Ppasswd;
+  User: TUser;
+begin
+  result := TUsers.Create;
+  setpwent;
+  repeat
+    pws := getpwent();
+    if assigned(pws) then
+    begin
+      User.UserName := string(pws.pw_name);
+      User.UserID := pws.pw_uid;
+      User.GroupID := pws.pw_gid;
+      User.RealName := string(pws.pw_gecos);
+      User.HomeDirectory := string(pws.pw_dir);
+      User.ShellProgram := string(pws.pw_shell);
+      if not OnlyInteractiveUsers or User.IsInteractiveUser then
+        result.Add(User);
+    end;
+  until pws = nil;
+end;
+
+class function TLX4DSystemInfo.GetUser(UserID: cardinal; var User: TUser): boolean;
+var
+  pws: Ppasswd;
+begin
+  result := true;
+  pws := getpwuid(UserID);
+  if assigned(pws) then
+  begin
+    User.UserName := string(pws.pw_name);
+    User.UserID := pws.pw_uid;
+    User.GroupID := pws.pw_gid;
+    User.RealName := string(pws.pw_gecos);
+    User.HomeDirectory := string(pws.pw_dir);
+    User.ShellProgram := string(pws.pw_shell);
+  end else begin
+    result := false;
+    User.UserName := '';
+    User.UserID := userID;
+    User.GroupID := 0;
+    User.RealName := '';
+    User.HomeDirectory := '';
+    User.ShellProgram := '';
+  end;
+end;
+{$ENDREGION}
+
+{$REGION 'Helpers'}
+class function TLX4DSystemInfo.ReadProcFile(const FilePath: string): TStringList;
+var
+  F: TextFile;
+  Line: string;
+begin
+  result := TStringList.Create;
+  AssignFile(F, FilePath);
+  Reset(F);
+  try
+    while not Eof(F) do
+    begin
+      ReadLn(F, Line);
+      result.Add(Line);
+    end;
+  finally
+    CloseFile(F);
+  end;
+end;
+
+class function TLX4DSystemInfo.YesNoStrToBool(const BoolStr: string): boolean;
+begin
+  if SameText(BoolStr, 'yes') or SameText(BoolStr, 'true') then
+    result := true
+  else
+    result := false;
+end;
 
 class function TLX4DSystemInfo.ToJSON: TJSONObject;
 begin
@@ -984,9 +1162,9 @@ begin
     AddPair('Kernel', FKernel.ToJSON).
     AddPair('CPU', FCPU.ToJSON);
 end;
+{$ENDREGION}
 
-{ TLX4DSystemInfo.TKernel }
-
+{$REGION 'TLX4DSystemInfo.TKernel'}
 function TLX4DSystemInfo.TKernel.PrettyName: string;
 begin
   result := Format('%s %s (%s), Net: %s', [SystemName, Release, Machine, NodeName]);
@@ -999,9 +1177,9 @@ begin
     AddPair('Release', Release).
     AddPair('Machine', Machine);
 end;
+{$ENDREGION}
 
-{ TLX4DSystemInfo.TCPU }
-
+{$REGION 'TLX4DSystemInfo.TCPU'}
 function TLX4DSystemInfo.TCPU.PrettyName: string;
 begin
   result := Format('%s (%s) (%d Cores, %4.2f MHz), CacheSize: %s, FPU: %s',
@@ -1018,9 +1196,9 @@ begin
     AddPair('CacheSize', CacheSize).
     AddPair('Details', Details.CommaText);
 end;
+{$ENDREGION}
 
-{ TLX4DSystemInfo.TDistribution }
-
+{$REGION 'TLX4DSystemInfo.TDistribution'}
 function TLX4DSystemInfo.TDistribution.KindStr: string;
 begin
   result := TRttiEnumerationType.GetName<TDistributionKind>(FDistribution.Kind);
@@ -1028,7 +1206,8 @@ end;
 
 function TLX4DSystemInfo.TDistribution.ToJSON: TJSONObject;
 begin
-  result := TJSONObject.Create(TJSONPair.Create('Kind', KindStr)).
+  result := TJSONObject.Create(
+    TJSONPair.Create('Kind', KindStr)).
     AddPair('ID', ID).
     AddPair('BaseID', BaseID).
     AddPair('CodeName', CodeName).
@@ -1037,9 +1216,9 @@ begin
     AddPair('Details', Details.CommaText).
     AddPair('SourceFile', SourceFile);
 end;
+{$ENDREGION}
 
-{ TLX4DSystemInfo.TMemory }
-
+{$REGION 'TLX4DSystemInfo.TMemory'}
 class operator TLX4DSystemInfo.TMemory.Finalize(var Dest: TMemory);
 begin
   FreeAndNil(Dest.Details);
@@ -1068,5 +1247,31 @@ begin
     [GetBytesInBestUnit(Total), GetBytesInBestUnit(Free), GetBytesInBestUnit(Available),
      GetBytesInBestUnit(Buffers), GetBytesInBestUnit(Cached)]);
 end;
+{$ENDREGION}
+
+{$REGION 'TLX4DSystemInfo.TUser'}
+function TLX4DSystemInfo.TUser.IsCurrentUser: boolean;
+begin
+  result := UserID = TLX4DSystemInfo.FUID;
+end;
+
+function TLX4DSystemInfo.TUser.IsInteractiveUser: boolean;
+begin
+  result := HomeDirectory.StartsWith('/home/');
+end;
+
+function TLX4DSystemInfo.TUser.ToJSON: TJSONObject;
+begin
+  result := TJSONObject.Create(
+    TJSONPair.Create('uid', UserID)).
+    AddPair('GID', GroupID).
+    AddPair('name', UserName).
+    AddPair('realName', RealName).
+    AddPair('isInteractiveUser', IsInteractiveUser).
+    AddPair('isCurrentUser', IsCurrentUser).
+    AddPair('homeDir', HomeDirectory).
+    AddPair('shell', ShellProgram);
+end;
+{$ENDREGION}
 
 end.
